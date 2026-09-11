@@ -1,4 +1,4 @@
-import type { Task } from './types'
+import type { Task, User } from './types'
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api'
 
@@ -13,7 +13,8 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   })
 
   if (!response.ok) {
-    throw new Error(`Request failed: ${response.status} ${response.statusText}`)
+    const body = await response.json().catch(() => null)
+    throw new Error(body?.message ?? `Request failed: ${response.status} ${response.statusText}`)
   }
 
   if (response.status === 204) {
@@ -40,6 +41,33 @@ export const tasksApi = {
 
   remove: (id: number) =>
     request<void>(`/tasks/${id}`, {
+      method: 'DELETE',
+    }),
+}
+
+export interface UserInput {
+  name: string
+  email: string
+  password?: string
+}
+
+export const usersApi = {
+  list: () => request<User[]>('/users'),
+
+  create: (data: UserInput) =>
+    request<User>('/users', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  update: (id: number, data: Partial<UserInput>) =>
+    request<User>(`/users/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  remove: (id: number) =>
+    request<void>(`/users/${id}`, {
       method: 'DELETE',
     }),
 }
