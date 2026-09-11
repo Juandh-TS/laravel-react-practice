@@ -33,7 +33,7 @@ class CompanyRepository implements CompanyRepositoryInterface
     {
         $company = $this->getById($id);
         $company->update($data);
-        return $company;
+        return $company->loadCount('users');
     }
 
     public function delete(int $id)
