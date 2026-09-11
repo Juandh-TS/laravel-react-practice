@@ -45,3 +45,86 @@ body {
   background: var(--color-bg);
   color: var(--color-text);
 }
+
+/* Cursor glow effect */
+
+.cursor-fx {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.cursor-fx-layer {
+  position: absolute;
+  inset: 0;
+}
+
+.cursor-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--color-primary);
+  box-shadow:
+    0 0 8px 3px var(--color-primary-soft),
+    0 0 16px 6px color-mix(in srgb, var(--color-primary) 30%, transparent);
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 0.2s ease, width 0.15s ease, height 0.15s ease, box-shadow 0.15s ease;
+  will-change: left, top;
+}
+
+.cursor-dot--click {
+  width: 7px;
+  height: 7px;
+  box-shadow:
+    0 0 11px 4px var(--color-primary-soft),
+    0 0 22px 8px color-mix(in srgb, var(--color-primary) 45%, transparent);
+}
+
+.cursor-trail-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--color-primary);
+  opacity: 0.5;
+  transform: translate(-50%, -50%) scale(1);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.cursor-trail-dot--fade {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.2);
+}
+
+.cursor-ripple {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  border: 2px solid var(--color-primary);
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 0.9;
+  animation: cursor-ripple-anim 0.6s ease-out forwards;
+}
+
+@keyframes cursor-ripple-anim {
+  to {
+    transform: translate(-50%, -50%) scale(4.5);
+    opacity: 0;
+  }
+}
+
+@media (any-hover: none), (any-pointer: coarse) {
+  .cursor-fx {
+    display: none;
+  }
+}
