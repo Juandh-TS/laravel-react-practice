@@ -33,19 +33,48 @@ export function TasksPage() {
   }
 
   async function handleToggle(task: Task) {
+    const previousCompleted = task.completed
+
+    // Optimistic update: cambiar inmediatamente en la UI
+    setTasks((current) =>
+      current.map((t) => (t.id === task.id ? { ...t, completed: !t.completed } : t))
+    )
+
     try {
       const updated = await tasksApi.toggle(task)
       setTasks((current) => current.map((t) => (t.id === task.id ? updated : t)))
     } catch (err) {
+      // Revertir estado en caso de error
+      setTasks((current) =>
+        current.map((t) => (t.id === task.id ? { ...t, completed: previousCompleted } : t))
+      )
       setFormError(err instanceof Error ? err.message : 'No se pudo actualizar la tarea.')
     }
   }
 
+  async function handleUpdate(id: number, title: string) {
+    try {
+      const updated = await tasksApi.update(id, { title })
+      setTasks((current) => current.map((t) => (t.id === id ? updated : t)))
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'No se pudo actualizar la tarea.')
+      throw err
+    }
+  }
+
   async function handleDelete(id: number) {
+    const deletedTask = tasks.find((t) => t.id === id)
+
+    // Optimistic update: quitar inmediatamente de la lista
+    setTasks((current) => current.filter((t) => t.id !== id))
+
     try {
       await tasksApi.remove(id)
-      setTasks((current) => current.filter((t) => t.id !== id))
     } catch (err) {
+      // Revertir agregando la tarea si falló la petición
+      if (deletedTask) {
+        setTasks((current) => [deletedTask, ...current])
+      }
       setFormError(err instanceof Error ? err.message : 'No se pudo borrar la tarea.')
     }
   }
@@ -75,6 +104,7 @@ export function TasksPage() {
             key={task.id}
             task={task}
             onToggle={handleToggle}
+            onUpdate={handleUpdate}
             onDelete={handleDelete}
           />
         ))}

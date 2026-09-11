@@ -180,7 +180,17 @@ button {
   background: var(--color-surface-muted);
   border: 1px solid var(--color-border);
   border-radius: 0.65rem;
-  transition: background-color 0.15s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.task-list li {
+  cursor: pointer;
+  user-select: none;
+}
+
+.task-list li.editing {
+  cursor: default;
+  user-select: auto;
 }
 
 .task-list li:hover,
@@ -188,11 +198,20 @@ button {
   border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
 }
 
-.task-list label {
+.task-list label,
+.task-list .task-content {
   display: flex;
   align-items: center;
   gap: 0.65rem;
   min-width: 0;
+  flex: 1;
+}
+
+.task-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
 }
 
 .task-list input[type='checkbox'] {
@@ -203,16 +222,42 @@ button {
   flex-shrink: 0;
 }
 
-.task-list li.completed label {
+.task-list li.completed label,
+.task-list li.completed .task-content,
+.task-list li.done label,
+.task-list li.done .task-content {
   color: var(--color-text-muted);
 }
 
-.task-list li.completed span.task-title {
+.task-list li.completed span.task-title,
+.task-list li.done span.task-title {
   text-decoration: line-through;
+  opacity: 0.7;
 }
 
 .task-title {
   overflow-wrap: anywhere;
+  cursor: pointer;
+  user-select: none;
+}
+
+.task-edit-form {
+  display: flex;
+  flex: 1;
+  margin: 0;
+}
+
+.task-edit-form .edit-input {
+  width: 100%;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.95rem;
+  font-family: inherit;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-primary);
+  border-radius: 0.45rem;
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-primary-soft);
 }
 
 /* Icon buttons (delete / edit) */

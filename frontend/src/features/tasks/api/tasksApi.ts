@@ -10,6 +10,12 @@ export const tasksApi = {
       body: JSON.stringify({ title }),
     }),
 
+  update: (id: number, data: Partial<{ title: string, completed: boolean }>) =>
+    request<Task>(`/tasks/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
   toggle: (task: Task) =>
     request<Task>(`/tasks/${task.id}`, {
       method: 'PUT',
