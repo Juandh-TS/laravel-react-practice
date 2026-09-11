@@ -51,8 +51,11 @@ function Tasks() {
 
   return (
     <>
-      <h1>Tareas</h1>
-      <p className="subtitle">Esto es un proyecto con React 19 + Vite consumiendo la API de Laravel</p>
+      <h1>
+        Tareas
+        {!loading && !error && <span className="count-badge">{tasks.length}</span>}
+      </h1>
+      <p className="subtitle">React 19 + Vite consumiendo la API de Laravel</p>
 
       <form className="task-form" onSubmit={handleSubmit}>
         <input
@@ -60,13 +63,15 @@ function Tasks() {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Nueva tarea..."
+          maxLength={255}
         />
-        <button type="submit">Agregar</button>
+        <button type="submit" className="btn">
+          Agregar
+        </button>
       </form>
 
-      {formError && <p className="error">{formError}</p>}
-      {error && <p className="error">{error}</p>}
-      {loading && <p>Cargando...</p>}
+      {formError && <p className="error">⚠ {formError}</p>}
+      {error && <p className="error">⚠ {error}</p>}
 
       <ul className="task-list">
         {tasks.map((task) => (
@@ -77,16 +82,19 @@ function Tasks() {
                 checked={task.completed}
                 onChange={() => handleToggle(task)}
               />
-              {task.title}
+              <span className="task-title">{task.title}</span>
             </label>
-            <button type="button" onClick={() => handleDelete(task.id)}>
+            <button type="button" className="icon-btn danger" onClick={() => handleDelete(task.id)}>
               Eliminar
             </button>
           </li>
         ))}
       </ul>
 
-      {!loading && !error && tasks.length === 0 && <p>No hay tareas todavía.</p>}
+      {loading && <p className="state-message">Cargando...</p>}
+      {!loading && !error && tasks.length === 0 && (
+        <p className="state-message">No hay tareas todavía. Agregá la primera arriba.</p>
+      )}
     </>
   )
 }

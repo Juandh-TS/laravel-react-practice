@@ -10,6 +10,8 @@ function App() {
 
   return (
     <main className="app">
+      <p className="brand">Laravel + React Practice</p>
+
       <nav className="tabs">
         <button
           type="button"
@@ -27,7 +29,7 @@ function App() {
         </button>
       </nav>
 
-      {tab === 'tasks' ? <Tasks /> : <Users />}
+      <div className="panel">{tab === 'tasks' ? <Tasks /> : <Users />}</div>
     </main>
   )
 }

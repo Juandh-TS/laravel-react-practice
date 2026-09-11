@@ -78,7 +78,10 @@ function Users() {
 
   return (
     <>
-      <h1>Usuarios</h1>
+      <h1>
+        Usuarios
+        {!loading && !error && <span className="count-badge">{users.length}</span>}
+      </h1>
       <p className="subtitle">CRUD de prueba sobre el modelo User</p>
 
       <form className="user-form" onSubmit={handleCreate}>
@@ -87,6 +90,7 @@ function Users() {
           value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value })}
           placeholder="Nombre"
+          maxLength={255}
           required
         />
         <input
@@ -94,6 +98,7 @@ function Users() {
           value={form.email}
           onChange={(e) => setForm({ ...form, email: e.target.value })}
           placeholder="Email"
+          maxLength={255}
           required
         />
         <input
@@ -101,14 +106,17 @@ function Users() {
           value={form.password}
           onChange={(e) => setForm({ ...form, password: e.target.value })}
           placeholder="Contraseña"
+          minLength={8}
+          maxLength={72}
           required
         />
-        <button type="submit">Agregar</button>
+        <button type="submit" className="btn">
+          Agregar
+        </button>
       </form>
 
-      {formError && <p className="error">{formError}</p>}
-      {error && <p className="error">{error}</p>}
-      {loading && <p>Cargando...</p>}
+      {formError && <p className="error">⚠ {formError}</p>}
+      {error && <p className="error">⚠ {error}</p>}
 
       <ul className="user-list">
         {users.map((user) =>
@@ -120,6 +128,7 @@ function Users() {
                   value={editForm.name}
                   onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                   placeholder="Nombre"
+                  maxLength={255}
                   required
                 />
                 <input
@@ -127,6 +136,7 @@ function Users() {
                   value={editForm.email}
                   onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
                   placeholder="Email"
+                  maxLength={255}
                   required
                 />
                 <input
@@ -134,27 +144,34 @@ function Users() {
                   value={editForm.password}
                   onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
                   placeholder="Nueva contraseña (opcional)"
+                  minLength={8}
+                  maxLength={72}
                 />
                 <div className="user-edit-actions">
-                  <button type="submit">Guardar</button>
-                  <button type="button" onClick={cancelEdit}>
+                  <button type="submit" className="btn">
+                    Guardar
+                  </button>
+                  <button type="button" className="btn secondary" onClick={cancelEdit}>
                     Cancelar
                   </button>
                 </div>
-                {editError && <p className="error">{editError}</p>}
+                {editError && <p className="error">⚠ {editError}</p>}
               </form>
             </li>
           ) : (
             <li key={user.id}>
-              <div>
-                <strong>{user.name}</strong>
-                <span className="user-email">{user.email}</span>
+              <div className="user-info">
+                <span className="user-avatar">{user.name.charAt(0).toUpperCase()}</span>
+                <div className="user-details">
+                  <strong>{user.name}</strong>
+                  <span className="user-email">{user.email}</span>
+                </div>
               </div>
               <div className="user-actions">
-                <button type="button" onClick={() => startEdit(user)}>
+                <button type="button" className="icon-btn" onClick={() => startEdit(user)}>
                   Editar
                 </button>
-                <button type="button" onClick={() => handleDelete(user.id)}>
+                <button type="button" className="icon-btn danger" onClick={() => handleDelete(user.id)}>
                   Eliminar
                 </button>
               </div>
@@ -163,7 +180,10 @@ function Users() {
         )}
       </ul>
 
-      {!loading && !error && users.length === 0 && <p>No hay usuarios todavía.</p>}
+      {loading && <p className="state-message">Cargando...</p>}
+      {!loading && !error && users.length === 0 && (
+        <p className="state-message">No hay usuarios todavía. Agregá el primero arriba.</p>
+      )}
     </>
   )
 }
