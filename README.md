@@ -9,7 +9,7 @@ Monorepo de práctica con un backend API en Laravel y un frontend SPA en React, 
 | Lenguaje | PHP 8.5 | TypeScript |
 | Framework | Laravel 13 | React 19 |
 | Build / dev server | Artisan (`php artisan serve`) | Vite 8 |
-| Base de datos | SQLite | — |
+| Base de datos | PostgreSQL | — |
 | Auth scaffolding | Sanctum (instalado, sin UI todavía) | — |
 | Testing | Pest | — |
 
@@ -32,6 +32,7 @@ cd backend
 composer install
 cp .env.example .env   # si no existe ya
 php artisan key:generate
+# requiere un servidor PostgreSQL corriendo y la base de datos creada (ver DB_DATABASE en .env)
 php artisan migrate
 php artisan serve
 ```
