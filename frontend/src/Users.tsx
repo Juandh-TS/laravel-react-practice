@@ -1,17 +1,19 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { usersApi } from './api'
-import type { User } from './types'
+import { companiesApi, usersApi, type UserInput } from './api'
+import type { Company, User } from './types'
 
 interface EditForm {
   name: string
   email: string
   password: string
+  companyId: string
 }
 
-const emptyEditForm: EditForm = { name: '', email: '', password: '' }
+const emptyEditForm: EditForm = { name: '', email: '', password: '', companyId: '' }
 
 function Users() {
   const [users, setUsers] = useState<User[]>([])
+  const [companies, setCompanies] = useState<Company[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -28,6 +30,8 @@ function Users() {
       .then(setUsers)
       .catch(() => setError('No se pudo conectar con la API. ¿Corriste "php artisan serve" en backend/?'))
       .finally(() => setLoading(false))
+
+    companiesApi.list().then(setCompanies).catch(() => {})
   }, [])
 
   async function handleCreate(event: FormEvent) {
@@ -35,7 +39,12 @@ function Users() {
     setFormError(null)
 
     try {
-      const user = await usersApi.create(form)
+      const user = await usersApi.create({
+        name: form.name,
+        email: form.email,
+        password: form.password,
+        company_id: form.companyId ? Number(form.companyId) : null,
+      })
       setUsers((current) => [user, ...current])
       setForm(emptyEditForm)
     } catch (err) {
@@ -45,7 +54,12 @@ function Users() {
 
   function startEdit(user: User) {
     setEditingId(user.id)
-    setEditForm({ name: user.name, email: user.email, password: '' })
+    setEditForm({
+      name: user.name,
+      email: user.email,
+      password: '',
+      companyId: user.company_id ? String(user.company_id) : '',
+    })
     setEditError(null)
   }
 
@@ -59,7 +73,11 @@ function Users() {
     event.preventDefault()
     setEditError(null)
 
-    const data: Partial<EditForm> = { name: editForm.name, email: editForm.email }
+    const data: Partial<UserInput> = {
+      name: editForm.name,
+      email: editForm.email,
+      company_id: editForm.companyId ? Number(editForm.companyId) : null,
+    }
     if (editForm.password) data.password = editForm.password
 
     try {
@@ -72,8 +90,12 @@ function Users() {
   }
 
   async function handleDelete(id: number) {
-    await usersApi.remove(id)
-    setUsers((current) => current.filter((u) => u.id !== id))
+    try {
+      await usersApi.remove(id)
+      setUsers((current) => current.filter((u) => u.id !== id))
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'No se pudo borrar el usuario.')
+    }
   }
 
   return (
@@ -110,6 +132,17 @@ function Users() {
           maxLength={72}
           required
         />
+        <select
+          value={form.companyId}
+          onChange={(e) => setForm({ ...form, companyId: e.target.value })}
+        >
+          <option value="">Sin empresa</option>
+          {companies.map((company) => (
+            <option key={company.id} value={company.id}>
+              {company.name}
+            </option>
+          ))}
+        </select>
         <button type="submit" className="btn">
           Agregar
         </button>
@@ -147,6 +180,17 @@ function Users() {
                   minLength={8}
                   maxLength={72}
                 />
+                <select
+                  value={editForm.companyId}
+                  onChange={(e) => setEditForm({ ...editForm, companyId: e.target.value })}
+                >
+                  <option value="">Sin empresa</option>
+                  {companies.map((company) => (
+                    <option key={company.id} value={company.id}>
+                      {company.name}
+                    </option>
+                  ))}
+                </select>
                 <div className="user-edit-actions">
                   <button type="submit" className="btn">
                     Guardar
@@ -165,6 +209,7 @@ function Users() {
                 <div className="user-details">
                   <strong>{user.name}</strong>
                   <span className="user-email">{user.email}</span>
+                  <span className="company-tag">{user.company ? user.company.name : 'Sin empresa'}</span>
                 </div>
               </div>
               <div className="user-actions">

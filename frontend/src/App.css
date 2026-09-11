@@ -93,7 +93,9 @@
 
 .task-form input,
 .user-form input,
-.user-edit-form input {
+.user-edit-form input,
+.user-form select,
+.user-edit-form select {
   flex: 1;
   min-width: 8rem;
   padding: 0.55rem 0.8rem;
@@ -107,6 +109,11 @@
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
+.user-form select,
+.user-edit-form select {
+  cursor: pointer;
+}
+
 .task-form input::placeholder,
 .user-form input::placeholder,
 .user-edit-form input::placeholder {
@@ -115,7 +122,9 @@
 
 .task-form input:focus,
 .user-form input:focus,
-.user-edit-form input:focus {
+.user-edit-form input:focus,
+.user-form select:focus,
+.user-edit-form select:focus {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px var(--color-primary-soft);
 }
@@ -274,6 +283,19 @@ button {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.company-tag {
+  display: inline-block;
+  align-self: flex-start;
+  margin-top: 0.3rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 0.7rem;
+  font-weight: 500;
 }
 
 .user-actions,

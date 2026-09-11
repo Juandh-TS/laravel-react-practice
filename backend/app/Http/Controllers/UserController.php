@@ -13,7 +13,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        return User::latest()->get();
+        return User::with('company')->latest()->get();
     }
 
     /**
@@ -25,11 +25,12 @@ class UserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8'],
+            'company_id' => ['nullable', 'exists:companies,id'],
         ]);
 
         $user = User::create($validated);
 
-        return response()->json($user, 201);
+        return response()->json($user->load('company'), 201);
     }
 
     /**
@@ -37,7 +38,7 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        return $user;
+        return $user->load('company');
     }
 
     /**
@@ -49,11 +50,12 @@ class UserController extends Controller
             'name' => ['sometimes', 'string', 'max:255'],
             'email' => ['sometimes', 'email', Rule::unique('users', 'email')->ignore($user->id)],
             'password' => ['sometimes', 'string', 'min:8'],
+            'company_id' => ['nullable', 'exists:companies,id'],
         ]);
 
         $user->update($validated);
 
-        return $user;
+        return $user->load('company');
     }
 
     /**

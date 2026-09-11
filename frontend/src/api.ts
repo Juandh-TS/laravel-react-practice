@@ -1,4 +1,4 @@
-import type { Task, User } from './types'
+import type { Company, Task, User } from './types'
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api'
 
@@ -49,6 +49,7 @@ export interface UserInput {
   name: string
   email: string
   password?: string
+  company_id?: number | null
 }
 
 export const usersApi = {
@@ -68,6 +69,31 @@ export const usersApi = {
 
   remove: (id: number) =>
     request<void>(`/users/${id}`, {
+      method: 'DELETE',
+    }),
+}
+
+export interface CompanyInput {
+  name: string
+}
+
+export const companiesApi = {
+  list: () => request<Company[]>('/companies'),
+
+  create: (data: CompanyInput) =>
+    request<Company>('/companies', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  update: (id: number, data: Partial<CompanyInput>) =>
+    request<Company>(`/companies/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  remove: (id: number) =>
+    request<void>(`/companies/${id}`, {
       method: 'DELETE',
     }),
 }
