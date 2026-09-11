@@ -7,6 +7,7 @@ function Tasks() {
   const [title, setTitle] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [formError, setFormError] = useState<string | null>(null)
 
   useEffect(() => {
     tasksApi
@@ -20,19 +21,32 @@ function Tasks() {
     event.preventDefault()
     if (!title.trim()) return
 
-    const task = await tasksApi.create(title.trim())
-    setTasks((current) => [task, ...current])
-    setTitle('')
+    setFormError(null)
+    try {
+      const task = await tasksApi.create(title.trim())
+      setTasks((current) => [task, ...current])
+      setTitle('')
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'No se pudo crear la tarea.')
+    }
   }
 
   async function handleToggle(task: Task) {
-    const updated = await tasksApi.toggle(task)
-    setTasks((current) => current.map((t) => (t.id === task.id ? updated : t)))
+    try {
+      const updated = await tasksApi.toggle(task)
+      setTasks((current) => current.map((t) => (t.id === task.id ? updated : t)))
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'No se pudo actualizar la tarea.')
+    }
   }
 
   async function handleDelete(id: number) {
-    await tasksApi.remove(id)
-    setTasks((current) => current.filter((t) => t.id !== id))
+    try {
+      await tasksApi.remove(id)
+      setTasks((current) => current.filter((t) => t.id !== id))
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'No se pudo borrar la tarea.')
+    }
   }
 
   return (
@@ -50,6 +64,7 @@ function Tasks() {
         <button type="submit">Agregar</button>
       </form>
 
+      {formError && <p className="error">{formError}</p>}
       {error && <p className="error">{error}</p>}
       {loading && <p>Cargando...</p>}
 
