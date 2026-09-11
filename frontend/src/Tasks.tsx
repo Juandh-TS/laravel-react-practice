@@ -52,7 +52,7 @@ function Tasks() {
   return (
     <>
       <h1>Tareas</h1>
-      <p className="subtitle">React 19 + Vite consumiendo la API de Laravel</p>
+      <p className="subtitle">Esto es un proyecto con React 19 + Vite consumiendo la API de Laravel</p>
 
       <form className="task-form" onSubmit={handleSubmit}>
         <input
