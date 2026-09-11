@@ -2,13 +2,13 @@
 
 namespace App\Providers;
 
+use App\Domains\Company\Repositories\Contracts\CompanyRepositoryInterface;
+use App\Domains\Company\Repositories\Eloquent\CompanyRepository;
+use App\Domains\Task\Repositories\Contracts\TaskRepositoryInterface;
+use App\Domains\Task\Repositories\Eloquent\TaskRepository;
+use App\Domains\User\Repositories\Contracts\UserRepositoryInterface;
+use App\Domains\User\Repositories\Eloquent\UserRepository;
 use Illuminate\Support\ServiceProvider;
-use App\Repositories\Contracts\TaskRepositoryInterface;
-use App\Repositories\Eloquent\TaskRepository;
-use App\Repositories\Contracts\UserRepositoryInterface;
-use App\Repositories\Eloquent\UserRepository;
-use App\Repositories\Contracts\CompanyRepositoryInterface;
-use App\Repositories\Eloquent\CompanyRepository;
 
 class AppServiceProvider extends ServiceProvider
 {

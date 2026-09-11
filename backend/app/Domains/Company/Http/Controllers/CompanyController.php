@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Domains\Company\Http\Controllers;
 
-use App\Models\Company;
+use App\Domains\Company\Repositories\Contracts\CompanyRepositoryInterface;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use App\Repositories\Contracts\CompanyRepositoryInterface;
 
 class CompanyController extends Controller
 {

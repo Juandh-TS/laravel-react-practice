@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Repositories\Contracts;
+namespace App\Domains\User\Repositories\Contracts;
 
 
-interface CompanyRepositoryInterface
+interface UserRepositoryInterface
 {
     public function getAll();
     public function getById(int $id);
