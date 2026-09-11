@@ -32,6 +32,11 @@ class DatabaseSeeder extends Seeder
             'company_id' => null,
         ]);
 
-        Task::factory(40)->create();
+        $users = User::all();
+
+        Task::factory(40)->sequence(fn () => [
+            'user_id' => ($user = $users->random())->id,
+            'company_id' => $user->company_id,
+        ])->create();
     }
 }

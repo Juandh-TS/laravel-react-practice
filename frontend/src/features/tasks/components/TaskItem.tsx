@@ -3,12 +3,13 @@ import type { Task } from '../types'
 
 interface TaskItemProps {
   task: Task
+  currentUserId?: number
   onToggle: (task: Task) => void
   onUpdate: (id: number, title: string) => Promise<void>
   onDelete: (id: number) => void
 }
 
-export function TaskItem({ task, onToggle, onUpdate, onDelete }: TaskItemProps) {
+export function TaskItem({ task, currentUserId, onToggle, onUpdate, onDelete }: TaskItemProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [editTitle, setEditTitle] = useState(task.title)
   const [isSaving, setIsSaving] = useState(false)
@@ -90,6 +91,13 @@ export function TaskItem({ task, onToggle, onUpdate, onDelete }: TaskItemProps) 
             />
             <span className="task-title">
               {task.title}
+            </span>
+            <span className={`task-scope ${task.company_id ? 'shared' : 'personal'}`}>
+              {task.company_id
+                ? task.user_id === currentUserId
+                  ? 'Compartida'
+                  : `De ${task.user?.name ?? 'un compañero'}`
+                : 'Personal'}
             </span>
           </div>
           <div className="task-actions">

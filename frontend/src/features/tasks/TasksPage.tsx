@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react'
 import { Badge } from '@/components/common/Badge'
 import { ErrorAlert } from '@/components/common/ErrorAlert'
 import { Spinner } from '@/components/common/Spinner'
+import { useAuth } from '@/features/auth/context/AuthContext'
 import { tasksApi } from './api/tasksApi'
 import { TaskForm } from './components/TaskForm'
 import { TaskItem } from './components/TaskItem'
 import type { Task } from './types'
 
 export function TasksPage() {
+  const { user } = useAuth()
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -103,6 +105,7 @@ export function TasksPage() {
           <TaskItem
             key={task.id}
             task={task}
+            currentUserId={user?.id}
             onToggle={handleToggle}
             onUpdate={handleUpdate}
             onDelete={handleDelete}

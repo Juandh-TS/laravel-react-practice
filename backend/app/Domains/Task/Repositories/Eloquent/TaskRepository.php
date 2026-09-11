@@ -4,6 +4,7 @@ namespace App\Domains\Task\Repositories\Eloquent;
 
 use App\Domains\Task\Models\Task;
 use App\Domains\Task\Repositories\Contracts\TaskRepositoryInterface;
+use App\Domains\User\Models\User;
 
 class TaskRepository implements TaskRepositoryInterface
 {
@@ -15,9 +16,19 @@ class TaskRepository implements TaskRepositoryInterface
         $this->task = $task;
     }
 
-    public function getAll()
+    public function getAllForUser(User $user)
     {
-        return $this->task->latest()->get();
+        return $this->task->query()
+            ->with('user:id,name')
+            ->where(function ($query) use ($user) {
+                $query->where('user_id', $user->id)->whereNull('company_id');
+
+                if ($user->company_id) {
+                    $query->orWhere('company_id', $user->company_id);
+                }
+            })
+            ->latest()
+            ->get();
     }
 
     public function getById(int $id)

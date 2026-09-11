@@ -2,9 +2,11 @@
 
 namespace App\Domains\Task\Http\Controllers;
 
+use App\Domains\Task\Models\Task;
 use App\Domains\Task\Repositories\Contracts\TaskRepositoryInterface;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class TaskController extends Controller
 {
@@ -17,9 +19,9 @@ class TaskController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return $this->taskRepository->getAll();
+        return $this->taskRepository->getAllForUser($request->user());
     }
 
     /**
@@ -31,6 +33,9 @@ class TaskController extends Controller
             'title' => ['required', 'string', 'max:255'],
         ]);
 
+        $validated['user_id'] = $request->user()->id;
+        $validated['company_id'] = $request->user()->company_id;
+
         $task = $this->taskRepository->create($validated);
 
         return response()->json($task, 201);
@@ -39,9 +44,9 @@ class TaskController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(int $id)
+    public function show(Request $request, int $id)
     {
-        return $this->taskRepository->getById($id);
+        return $this->authorizedTask($request, $id);
     }
 
     /**
@@ -49,6 +54,8 @@ class TaskController extends Controller
      */
     public function update(Request $request, int $id)
     {
+        $this->authorizedTask($request, $id);
+
         $validated = $request->validate([
             'title' => ['sometimes', 'string', 'max:255'],
             'completed' => ['sometimes', 'boolean'],
@@ -60,10 +67,32 @@ class TaskController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(int $id)
+    public function destroy(Request $request, int $id)
     {
+        $this->authorizedTask($request, $id);
+
         $this->taskRepository->delete($id);
 
         return response()->noContent();
+    }
+
+    /**
+     * Fetch the task by id and ensure the authenticated user may access it
+     * (owner, or same company as the task).
+     */
+    private function authorizedTask(Request $request, int $id): Task
+    {
+        $task = $this->taskRepository->getById($id);
+
+        if (! $task) {
+            throw new NotFoundHttpException();
+        }
+
+        $user = $request->user();
+        $sameCompany = $task->company_id && $task->company_id === $user->company_id;
+
+        abort_unless($task->user_id === $user->id || $sameCompany, 403);
+
+        return $task;
     }
 }

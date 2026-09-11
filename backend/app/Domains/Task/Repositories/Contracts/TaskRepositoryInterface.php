@@ -2,10 +2,11 @@
 
 namespace App\Domains\Task\Repositories\Contracts;
 
+use App\Domains\User\Models\User;
 
 interface TaskRepositoryInterface
 {
-    public function getAll();
+    public function getAllForUser(User $user);
     public function getById(int $id);
     public function create(array $data);
     public function update(int $id, array $data);

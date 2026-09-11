@@ -340,6 +340,26 @@ button {
   user-select: none;
 }
 
+.task-scope {
+  flex-shrink: 0;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.task-scope.personal {
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+}
+
+.task-scope.shared {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
 .task-edit-form {
   display: flex;
   flex: 1;
