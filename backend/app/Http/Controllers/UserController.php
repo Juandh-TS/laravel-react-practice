@@ -2,18 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Repositories\Contracts\UserRepositoryInterface;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
+    protected $userRepository;
+
+    public function __construct(UserRepositoryInterface $userRepository)
+    {
+        $this->userRepository = $userRepository;
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return User::with('company')->latest()->get();
+        return $this->userRepository->getAll();
     }
 
     /**
@@ -28,7 +35,7 @@ class UserController extends Controller
             'company_id' => ['nullable', 'exists:companies,id'],
         ]);
 
-        $user = User::create($validated);
+        $user = $this->userRepository->create($validated);
 
         return response()->json($user->load('company'), 201);
     }
@@ -36,34 +43,32 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(User $user)
+    public function show(int $id)
     {
-        return $user->load('company');
+        return $this->userRepository->getById($id);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, User $user)
+    public function update(Request $request, int $id)
     {
         $validated = $request->validate([
             'name' => ['sometimes', 'string', 'max:255'],
-            'email' => ['sometimes', 'email', Rule::unique('users', 'email')->ignore($user->id)],
+            'email' => ['sometimes', 'email', Rule::unique('users', 'email')->ignore($id)],
             'password' => ['sometimes', 'string', 'min:8'],
             'company_id' => ['nullable', 'exists:companies,id'],
         ]);
 
-        $user->update($validated);
-
-        return $user->load('company');
+        return $this->userRepository->update($id, $validated);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(User $user)
+    public function destroy(int $id)
     {
-        $user->delete();
+        $this->userRepository->delete($id);
 
         return response()->noContent();
     }

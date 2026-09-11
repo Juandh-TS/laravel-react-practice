@@ -5,14 +5,21 @@ namespace App\Http\Controllers;
 use App\Models\Task;
 use Illuminate\Http\Request;
 
+use App\Repositories\Contracts\TaskRepositoryInterface;
 class TaskController extends Controller
 {
+    protected $taskRepository;
+
+    public function __construct(TaskRepositoryInterface $taskRepository)
+    {
+        $this->taskRepository = $taskRepository;
+    }
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return Task::latest()->get();
+        return $this->taskRepository->getAll();
     }
 
     /**
@@ -24,7 +31,7 @@ class TaskController extends Controller
             'title' => ['required', 'string', 'max:255'],
         ]);
 
-        $task = Task::create($validated);
+        $task = $this->taskRepository->create($validated);
 
         return response()->json($task, 201);
     }
@@ -32,32 +39,30 @@ class TaskController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Task $task)
+    public function show(int $id)
     {
-        return $task;
+        return $this->taskRepository->getById($id);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Task $task)
+    public function update(Request $request, int $id)
     {
         $validated = $request->validate([
             'title' => ['sometimes', 'string', 'max:255'],
             'completed' => ['sometimes', 'boolean'],
         ]);
 
-        $task->update($validated);
-
-        return $task;
+        return $this->taskRepository->update($id, $validated);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Task $task)
+    public function destroy(int $id)
     {
-        $task->delete();
+        $this->taskRepository->delete($id);
 
         return response()->noContent();
     }

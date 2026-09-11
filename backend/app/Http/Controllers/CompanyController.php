@@ -5,15 +5,23 @@ namespace App\Http\Controllers;
 use App\Models\Company;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use App\Repositories\Contracts\CompanyRepositoryInterface;
 
 class CompanyController extends Controller
 {
+    protected $companyRepository;
+
+    public function __construct(CompanyRepositoryInterface $companyRepository)
+    {
+        $this->companyRepository = $companyRepository;
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return Company::withCount('users')->latest()->get();
+        return $this->companyRepository->getAll();
     }
 
     /**
@@ -25,7 +33,7 @@ class CompanyController extends Controller
             'name' => ['required', 'string', 'max:255', 'unique:companies,name'],
         ]);
 
-        $company = Company::create($validated);
+        $company = $this->companyRepository->create($validated);
 
         return response()->json($company, 201);
     }
@@ -33,31 +41,29 @@ class CompanyController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Company $company)
+    public function show(int $id)
     {
-        return $company->loadCount('users')->load('users');
+        return $this->companyRepository->getById($id);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Company $company)
+    public function update(Request $request, int $id)
     {
         $validated = $request->validate([
-            'name' => ['sometimes', 'string', 'max:255', Rule::unique('companies', 'name')->ignore($company->id)],
+            'name' => ['sometimes', 'string', 'max:255', Rule::unique('companies', 'name')->ignore($id)],
         ]);
 
-        $company->update($validated);
-
-        return $company->loadCount('users');
+        return $this->companyRepository->update($id, $validated);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Company $company)
+    public function destroy(int $id)
     {
-        $company->delete();
+        $this->companyRepository->delete($id);
 
         return response()->noContent();
     }
