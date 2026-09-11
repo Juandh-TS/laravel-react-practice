@@ -65,7 +65,7 @@ export function CompanyItem({ company, onUpdate, onDelete }: CompanyItemProps) {
 
   return (
     <li>
-      <div className="user-header" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <div className="user-header" style={{ display: "flex", alignItems: 'center', gap: '12px' }}>
         <span className="user-avatar">{company.name.charAt(0).toUpperCase()}</span>
         <strong>{company.name}</strong>
       </div>
