@@ -16,12 +16,12 @@ class CompanyRepository implements CompanyRepositoryInterface
 
     public function getAll()
     {
-        return $this->company->latest()->get();
+        return $this->company->withCount('users')->latest()->get();
     }
 
     public function getById(int $id)
     {
-        return $this->company->findOrFail($id);
+        return $this->company->withCount('users')->findOrFail($id);
     }
 
     public function create(array $data)
