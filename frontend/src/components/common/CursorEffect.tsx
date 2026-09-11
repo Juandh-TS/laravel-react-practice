@@ -5,6 +5,9 @@ const TRAIL_LIFETIME_MS = 500
 const MAX_TRAIL_DOTS = 14
 const EASING = 0.2
 const LASER_POINT_LIFETIME_MS = 400
+const STREAK_RESET_MS = 600
+const STREAK_BADGE_LIFETIME_MS = 700
+const STREAK_HOT_THRESHOLD = 5
 
 interface LaserPoint {
   x: number
@@ -18,6 +21,8 @@ export function CursorEffect() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [drawMode, setDrawMode] = useState(false)
   const drawModeRef = useRef(drawMode)
+  const [streakCount, setStreakCount] = useState(0)
+  const [bestStreak, setBestStreak] = useState(0)
 
   useEffect(() => {
     drawModeRef.current = drawMode
@@ -44,6 +49,9 @@ export function CursorEffect() {
     let lastTrailTime = 0
     let rafId = 0
     let laserPoints: LaserPoint[] = []
+    let clickStreak = 0
+    let lastClickTime = 0
+    let bestClickStreak = 0
 
     const resizeCanvas = () => {
       const dpr = window.devicePixelRatio || 1
@@ -77,6 +85,17 @@ export function CursorEffect() {
       window.setTimeout(() => ripple.remove(), 600)
     }
 
+    const spawnStreakBadge = (x: number, y: number, count: number) => {
+      const badge = document.createElement('span')
+      badge.className = 'cursor-streak'
+      if (count >= STREAK_HOT_THRESHOLD) badge.classList.add('cursor-streak--hot')
+      badge.textContent = `x${count}`
+      badge.style.left = `${x}px`
+      badge.style.top = `${y}px`
+      layer.appendChild(badge)
+      window.setTimeout(() => badge.remove(), STREAK_BADGE_LIFETIME_MS)
+    }
+
     const handleMouseMove = (event: MouseEvent) => {
       targetX = event.clientX
       targetY = event.clientY
@@ -99,7 +118,20 @@ export function CursorEffect() {
     }
 
     const handleMouseDown = (event: MouseEvent) => {
+      const now = performance.now()
+      clickStreak = now - lastClickTime <= STREAK_RESET_MS ? clickStreak + 1 : 1
+      lastClickTime = now
+      setStreakCount(clickStreak)
+
+      if (clickStreak > bestClickStreak) {
+        bestClickStreak = clickStreak
+        setBestStreak(bestClickStreak)
+      }
+
       spawnRipple(event.clientX, event.clientY)
+      if (clickStreak > 1) {
+        spawnStreakBadge(event.clientX, event.clientY, clickStreak)
+      }
       dot.classList.add('cursor-dot--click')
       window.setTimeout(() => dot.classList.remove('cursor-dot--click'), 200)
     }
@@ -160,6 +192,12 @@ export function CursorEffect() {
         <div ref={layerRef} className="cursor-fx-layer" />
         <div ref={dotRef} className="cursor-dot" />
       </div>
+      {streakCount > 0 && (
+        <div className="cursor-streak-hud" aria-hidden="true">
+          Racha: <strong>x{streakCount}</strong>
+          {bestStreak > 1 && <span> · Mejor: x{bestStreak}</span>}
+        </div>
+      )}
       <button
         type="button"
         className={`cursor-draw-toggle${drawMode ? ' cursor-draw-toggle--active' : ''}`}

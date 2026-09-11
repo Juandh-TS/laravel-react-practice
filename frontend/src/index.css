@@ -137,6 +137,58 @@ body {
   }
 }
 
+.cursor-streak {
+  position: fixed;
+  top: 0;
+  left: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  white-space: nowrap;
+  animation: cursor-streak-anim 0.7s ease-out forwards;
+}
+
+.cursor-streak--hot {
+  color: var(--color-danger);
+  font-size: 1.05rem;
+}
+
+@keyframes cursor-streak-anim {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -80%) scale(0.8);
+  }
+  15% {
+    opacity: 1;
+    transform: translate(-50%, -110%) scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -220%) scale(1);
+  }
+}
+
+.cursor-streak-hud {
+  position: fixed;
+  top: 1.25rem;
+  right: 1.25rem;
+  z-index: 10000;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+  pointer-events: none;
+}
+
+.cursor-streak-hud strong {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
 .cursor-draw-toggle {
   position: fixed;
   right: 1.25rem;
