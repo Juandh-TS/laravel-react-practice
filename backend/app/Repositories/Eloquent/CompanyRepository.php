@@ -16,12 +16,12 @@ class CompanyRepository implements CompanyRepositoryInterface
 
     public function getAll()
     {
-        return $this->company->latest()->get();
+        return $this->company->withCount('users')->latest()->get();
     }
 
     public function getById(int $id)
     {
-        return $this->company->findOrFail($id);
+        return $this->company->withCount('users')->findOrFail($id);
     }
 
     public function create(array $data)
@@ -33,7 +33,7 @@ class CompanyRepository implements CompanyRepositoryInterface
     {
         $company = $this->getById($id);
         $company->update($data);
-        return $company;
+        return $company->loadCount('users');
     }
 
     public function delete(int $id)

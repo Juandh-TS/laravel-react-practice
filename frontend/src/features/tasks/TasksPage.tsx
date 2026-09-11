@@ -1,0 +1,84 @@
+import { useEffect, useState } from 'react'
+import { Badge } from '@/components/common/Badge'
+import { ErrorAlert } from '@/components/common/ErrorAlert'
+import { Spinner } from '@/components/common/Spinner'
+import { tasksApi } from './api/tasksApi'
+import { TaskForm } from './components/TaskForm'
+import { TaskItem } from './components/TaskItem'
+import type { Task } from './types'
+
+export function TasksPage() {
+  const [tasks, setTasks] = useState<Task[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [formError, setFormError] = useState<string | null>(null)
+
+  useEffect(() => {
+    tasksApi
+      .list()
+      .then(setTasks)
+      .catch(() => setError('No se pudo conectar con la API. ¿Corriste "php artisan serve" en backend/?'))
+      .finally(() => setLoading(false))
+  }, [])
+
+  async function handleCreate(title: string) {
+    setFormError(null)
+    try {
+      const task = await tasksApi.create(title)
+      setTasks((current) => [task, ...current])
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'No se pudo crear la tarea.')
+      throw err
+    }
+  }
+
+  async function handleToggle(task: Task) {
+    try {
+      const updated = await tasksApi.toggle(task)
+      setTasks((current) => current.map((t) => (t.id === task.id ? updated : t)))
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'No se pudo actualizar la tarea.')
+    }
+  }
+
+  async function handleDelete(id: number) {
+    try {
+      await tasksApi.remove(id)
+      setTasks((current) => current.filter((t) => t.id !== id))
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'No se pudo borrar la tarea.')
+    }
+  }
+
+  return (
+    <>
+      <h1>
+        Tareas
+        {!loading && !error && <Badge count={tasks.length} />}
+      </h1>
+      <p className="subtitle">React 19 + Vite consumiendo la API de Laravel</p>
+
+      <TaskForm onSubmit={handleCreate} />
+
+      <ErrorAlert message={formError} />
+      <ErrorAlert message={error} />
+
+      {loading && <Spinner message="Cargando tareas..." />}
+
+      {!loading && !error && tasks.length === 0 && (
+        <p className="state-message">No hay tareas pendientes. ¡Agrega una!</p>
+      )}
+
+      <ul className="task-list">
+        {tasks.map((task) => (
+          <TaskItem
+            key={task.id}
+            task={task}
+            onToggle={handleToggle}
+            onDelete={handleDelete}
+          />
+        ))}
+      </ul>
+    </>
+  )
+}
