@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Domains\Task\Http\Controllers;
 
-use App\Models\Task;
+use App\Domains\Task\Repositories\Contracts\TaskRepositoryInterface;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-use App\Repositories\Contracts\TaskRepositoryInterface;
 class TaskController extends Controller
 {
     protected $taskRepository;

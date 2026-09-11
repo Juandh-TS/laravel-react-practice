@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Domains\User\Http\Controllers;
 
-use App\Repositories\Contracts\UserRepositoryInterface;
+use App\Domains\User\Repositories\Contracts\UserRepositoryInterface;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 

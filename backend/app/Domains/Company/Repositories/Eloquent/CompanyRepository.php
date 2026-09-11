@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Repositories\Eloquent;
+namespace App\Domains\Company\Repositories\Eloquent;
 
-use App\Models\Company;
-use App\Repositories\Contracts\CompanyRepositoryInterface;
+use App\Domains\Company\Models\Company;
+use App\Domains\Company\Repositories\Contracts\CompanyRepositoryInterface;
 
 class CompanyRepository implements CompanyRepositoryInterface
 {
