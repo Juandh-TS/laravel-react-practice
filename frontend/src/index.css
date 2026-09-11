@@ -60,6 +60,13 @@ body {
   inset: 0;
 }
 
+.cursor-draw-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
 .cursor-dot {
   position: fixed;
   top: 0;
@@ -83,6 +90,13 @@ body {
   box-shadow:
     0 0 11px 4px var(--color-primary-soft),
     0 0 22px 8px color-mix(in srgb, var(--color-primary) 45%, transparent);
+}
+
+.cursor-dot--draw {
+  background: var(--color-success);
+  box-shadow:
+    0 0 8px 3px color-mix(in srgb, var(--color-success) 45%, transparent),
+    0 0 16px 6px color-mix(in srgb, var(--color-success) 25%, transparent);
 }
 
 .cursor-trail-dot {
@@ -123,8 +137,41 @@ body {
   }
 }
 
+.cursor-draw-toggle {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 10000;
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  box-shadow: var(--shadow-md);
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+.cursor-draw-toggle:hover {
+  color: var(--color-text);
+}
+
+.cursor-draw-toggle:active {
+  transform: scale(0.96);
+}
+
+.cursor-draw-toggle--active {
+  background: var(--color-success);
+  border-color: var(--color-success);
+  color: #fff;
+}
+
 @media (any-hover: none), (any-pointer: coarse) {
-  .cursor-fx {
+  .cursor-fx,
+  .cursor-draw-toggle {
     display: none;
   }
 }
