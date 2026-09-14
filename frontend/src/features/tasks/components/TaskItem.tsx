@@ -1,73 +1,84 @@
-import { useState, type KeyboardEvent, type MouseEvent, type SyntheticEvent } from 'react'
-import { ConfirmDialog } from '@/components/common/ConfirmDialog'
-import type { Task } from '../types'
+import {
+  useState,
+  type KeyboardEvent,
+  type MouseEvent,
+  type SyntheticEvent,
+} from "react";
+import { ConfirmDialog } from "@/components/common/ConfirmDialog";
+import type { Task } from "../types";
 
 interface TaskItemProps {
-  task: Task
-  currentUserId?: number
-  onToggle: (task: Task) => void
-  onUpdate: (id: number, title: string) => Promise<void>
-  onDelete: (id: number) => void
+  task: Task;
+  currentUserId?: number;
+  onToggle: (task: Task) => void;
+  onUpdate: (id: number, title: string) => Promise<void>;
+  onDelete: (id: number) => void;
 }
 
-export function TaskItem({ task, currentUserId, onToggle, onUpdate, onDelete }: TaskItemProps) {
-  const [isEditing, setIsEditing] = useState(false)
-  const [editTitle, setEditTitle] = useState(task.title)
-  const [isSaving, setIsSaving] = useState(false)
-  const [confirmingDelete, setConfirmingDelete] = useState(false)
+export function TaskItem({
+  task,
+  currentUserId,
+  onToggle,
+  onUpdate,
+  onDelete,
+}: TaskItemProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState(task.title);
+  const [isSaving, setIsSaving] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   function startEditing() {
-    setEditTitle(task.title)
-    setIsEditing(true)
+    setEditTitle(task.title);
+    setIsEditing(true);
   }
 
   function cancelEditing() {
-    setEditTitle(task.title)
-    setIsEditing(false)
+    setEditTitle(task.title);
+    setIsEditing(false);
   }
 
   function handleDoubleClick(e: MouseEvent<HTMLLIElement>) {
-    const target = e.target as HTMLElement
+    const target = e.target as HTMLElement;
     // Ignore double click if clicking directly on buttons or checkboxes
-    if (target.closest('button') || target.tagName === 'INPUT') {
-      return
+    if (target.closest("button") || target.tagName === "INPUT") {
+      return;
     }
-    startEditing()
+    startEditing();
   }
 
   async function handleSave(e?: SyntheticEvent) {
-    e?.preventDefault()
-    const trimmed = editTitle.trim()
+    e?.preventDefault();
+    const trimmed = editTitle.trim();
 
-    if (!trimmed || isSaving) return
+    if (!trimmed || isSaving) return;
 
     if (trimmed === task.title) {
-      setIsEditing(false)
-      return
+      setIsEditing(false);
+      return;
     }
 
-    setIsSaving(true)
+    setIsSaving(true);
     try {
-      await onUpdate(task.id, trimmed)
-      setIsEditing(false)
+      await onUpdate(task.id, trimmed);
+      setIsEditing(false);
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
   }
 
   function handleKeyDown(e: KeyboardEvent) {
-    if (e.key === 'Escape') {
-      cancelEditing()
-    } else if (e.key === 'Enter') {
-      handleSave()
+    if (e.key === "Escape") {
+      cancelEditing();
+    } else if (e.key === "Enter") {
+      handleSave();
     }
   }
 
   return (
     <li
-      className={`task-item ${task.completed ? 'completed done' : ''} ${isEditing ? 'editing' : ''} ${isSaving ? 'saving' : ''}`}
+      className={`task-item ${task.completed ? "completed done" : ""} ${isEditing ? "editing" : ""} ${isSaving ? "saving" : ""}`}
       onDoubleClick={handleDoubleClick}
-      data-tooltip={!isEditing ? 'Doble clic para editar' : undefined}
+      data-tooltip={!isEditing ? "Doble clic para editar" : undefined}
     >
       {isEditing ? (
         <form onSubmit={handleSave} className="task-edit-form">
@@ -91,15 +102,38 @@ export function TaskItem({ task, currentUserId, onToggle, onUpdate, onDelete }: 
               onChange={() => onToggle(task)}
               aria-label={`Marcar como completada: ${task.title}`}
             />
-            <span className="task-title">
-              {task.title}
-            </span>
-            <span className={`task-scope ${task.company_id ? 'shared' : 'personal'}`}>
+            <span className="task-title">{task.title}</span>
+            {(() => {
+              const assigner = task.assigned_by ?? task.assignedBy;
+              const assignedDate = task.assigned_at ?? task.assignedAt;
+              const isAssignedToOther =
+                currentUserId && task.user_id !== currentUserId && task.user;
+
+              return (
+                <div className="task-meta-badges">
+                  {isAssignedToOther && (
+                    <span className="task-assigned-to-badge">
+                      Asignada a: <strong>{task.user?.name}</strong>
+                    </span>
+                  )}
+                  {assigner && assigner.id !== currentUserId && (
+                    <span className="task-assigned-badge">
+                      Asignada por: <strong>{assigner.name}</strong>
+                      {assignedDate &&
+                        ` (${new Date(assignedDate).toLocaleDateString()})`}
+                    </span>
+                  )}
+                </div>
+              );
+            })()}
+            <span
+              className={`task-scope ${task.company_id ? "shared" : "personal"}`}
+            >
               {task.company_id
                 ? task.user_id === currentUserId
-                  ? 'Compartida'
-                  : `De ${task.user?.name ?? 'un compañero'}`
-                : 'Personal'}
+                  ? "Compartida"
+                  : `De ${task.user?.name ?? "un compañero"}`
+                : "Personal"}
             </span>
           </div>
           <div className="task-actions">
@@ -130,11 +164,11 @@ export function TaskItem({ task, currentUserId, onToggle, onUpdate, onDelete }: 
         title="Borrar tarea"
         description={`¿Seguro que quieres borrar "${task.title}"? Esta acción no se puede deshacer.`}
         onConfirm={() => {
-          onDelete(task.id)
-          setConfirmingDelete(false)
+          onDelete(task.id);
+          setConfirmingDelete(false);
         }}
         onCancel={() => setConfirmingDelete(false)}
       />
     </li>
-  )
+  );
 }

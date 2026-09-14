@@ -21,7 +21,7 @@ class TaskController extends Controller
      */
     public function index(Request $request)
     {
-        return $this->taskRepository->getAllForUser($request->user());
+        return $this->taskRepository->getAllForUser($request->user(), $request->query('filter'));
     }
 
     /**
@@ -31,14 +31,24 @@ class TaskController extends Controller
     {
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
+            'user_id' => ['nullable', 'exists:users,id'],
         ]);
 
-        $validated['user_id'] = $request->user()->id;
         $validated['company_id'] = $request->user()->company_id;
+
+        $authUser = $request->user();
+        
+        if ($authUser->isAdmin() && !empty($validated['user_id']) && $validated['user_id'] != $authUser->id) {
+            $validated['assigned_by_user_id'] = $authUser->id;
+            $validated['assigned_at'] = now();
+        } else {
+            // Si no es admin se le asgin a a el mismo
+            $validated['user_id'] = $authUser->id;
+        }
 
         $task = $this->taskRepository->create($validated);
 
-        return response()->json($task, 201);
+        return response()->json($task->load(['user:id,name', 'assignedBy:id,name']), 201);
     }
 
     /**
@@ -91,7 +101,13 @@ class TaskController extends Controller
         $user = $request->user();
         $sameCompany = $task->company_id && $task->company_id === $user->company_id;
 
-        abort_unless($task->user_id === $user->id || $sameCompany, 403);
+        abort_unless(
+            $task->user_id === $user->id ||
+            $task->assigned_by_user_id === $user->id ||
+            $user->isAdmin() ||
+            $sameCompany,
+            403
+        );
 
         return $task;
     }

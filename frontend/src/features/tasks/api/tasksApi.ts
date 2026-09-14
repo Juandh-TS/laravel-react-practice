@@ -1,13 +1,16 @@
 import { request } from '@/api/client'
-import type { Task } from '../types'
+import type { Task, TaskFilter } from '../types'
 
 export const tasksApi = {
-  list: () => request<Task[]>('/tasks'),
+  list: (filter?: TaskFilter) => {
+    const query = filter && filter !== 'all' ? `?filter=${encodeURIComponent(filter)}` : ''
+    return request<Task[]>(`/tasks${query}`)
+  },
 
-  create: (title: string) =>
+  create: (title: string, userId?: number) =>
     request<Task>('/tasks', {
       method: 'POST',
-      body: JSON.stringify({ title }),
+      body: JSON.stringify({ title, user_id: userId }),
     }),
 
   update: (id: number, data: Partial<{ title: string, completed: boolean }>) =>

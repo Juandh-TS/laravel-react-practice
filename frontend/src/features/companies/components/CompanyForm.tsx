@@ -1,24 +1,24 @@
-import { useState, type FormEvent } from 'react'
+import { useState, type FormEvent } from "react";
 
 interface CompanyFormProps {
-  onSubmit: (name: string) => Promise<void>
+  onSubmit: (name: string) => Promise<void>;
 }
 
 export function CompanyForm({ onSubmit }: CompanyFormProps) {
-  const [name, setName] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [name, setName] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(event: FormEvent) {
-    event.preventDefault()
-    const trimmed = name.trim()
-    if (!trimmed || isSubmitting) return
+    event.preventDefault();
+    const trimmed = name.trim();
+    if (!trimmed || isSubmitting) return;
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     try {
-      await onSubmit(trimmed)
-      setName('')
+      await onSubmit(trimmed);
+      setName("");
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
   }
 
@@ -31,9 +31,13 @@ export function CompanyForm({ onSubmit }: CompanyFormProps) {
         onChange={(e) => setName(e.target.value)}
         disabled={isSubmitting}
       />
-      <button type="submit" className="btn primary" disabled={isSubmitting || !name.trim()}>
-        {isSubmitting ? 'Creando...' : 'Crear empresa'}
+      <button
+        type="submit"
+        className="btn primary"
+        disabled={isSubmitting || !name.trim()}
+      >
+        {isSubmitting ? "Creando..." : "Crear empresa"}
       </button>
     </form>
-  )
+  );
 }

@@ -4,6 +4,7 @@ export interface User {
   id: number
   name: string
   email: string
+  role?: 'admin' | 'user' | string
   company_id: number | null
   company: Company | null
   is_active: boolean
@@ -15,6 +16,6 @@ export interface User {
 export interface UserInput {
   name: string
   email: string
-  password?: string
+  password: string
   company_id?: number | null
 }

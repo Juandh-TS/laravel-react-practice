@@ -16,19 +16,28 @@ class TaskRepository implements TaskRepositoryInterface
         $this->task = $task;
     }
 
-    public function getAllForUser(User $user)
+    public function getAllForUser(User $user, ?string $filter = null)
     {
-        return $this->task->query()
-            ->with('user:id,name')
-            ->where(function ($query) use ($user) {
-                $query->where('user_id', $user->id)->whereNull('company_id');
+        $query = $this->task->query()
+            ->with(['user:id,name', 'assignedBy:id,name']);
+
+        if ($filter === 'assigned_to_me') {
+            $query->where('user_id', $user->id);
+        } elseif ($filter === 'assigned_by_me') {
+            $query->where('assigned_by_user_id', $user->id)
+                ->where('user_id', '!=', $user->id);
+        } else {
+            $query->where(function ($q) use ($user) {
+                $q->where('user_id', $user->id)
+                    ->orWhere('assigned_by_user_id', $user->id);
 
                 if ($user->company_id) {
-                    $query->orWhere('company_id', $user->company_id);
+                    $q->orWhere('company_id', $user->company_id);
                 }
-            })
-            ->latest()
-            ->get();
+            });
+        }
+
+        return $query->latest()->get();
     }
 
     public function getById(int $id)

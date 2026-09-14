@@ -16,11 +16,18 @@ class Task extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['title', 'completed', 'user_id', 'company_id'];
+    protected $fillable = [
+        'title',
+        'completed',
+        'user_id',
+        'company_id',
+        'assigned_by_user_id',
+        'assigned_at'
+    ];
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class,'user_id');
     }
 
     public function company(): BelongsTo
@@ -28,10 +35,16 @@ class Task extends Model
         return $this->belongsTo(Company::class);
     }
 
+    public function assignedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assigned_by_user_id');
+    }
+
     protected function casts(): array
     {
         return [
             'completed' => 'boolean',
+            'assigned_at' => 'datetime',
         ];
     }
 }
