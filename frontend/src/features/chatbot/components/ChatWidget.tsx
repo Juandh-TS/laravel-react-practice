@@ -4,6 +4,8 @@ import { chatbotApi } from '../api/chatbotApi'
 import type { ChatMessage } from '../types'
 import './ChatWidget.css'
 
+const HISTORY_LIMIT = 20
+
 export function ChatWidget() {
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState<ChatMessage[]>([])
@@ -11,6 +13,7 @@ export function ChatWidget() {
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (open) {
@@ -30,12 +33,13 @@ export function ChatWidget() {
     setSending(true)
 
     try {
-      const response = await chatbotApi.ask(text, history)
+      const response = await chatbotApi.ask(text, history.slice(-HISTORY_LIMIT))
       setMessages((current) => [...current, { role: 'assistant', content: response.message }])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo enviar el mensaje.')
     } finally {
       setSending(false)
+      inputRef.current?.focus()
     }
   }
 
@@ -86,11 +90,11 @@ export function ChatWidget() {
 
           <form className="chat-input-form" onSubmit={handleSubmit}>
             <input
+              ref={inputRef}
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Escribe tu pregunta..."
-              disabled={sending}
               autoFocus
             />
             <button type="submit" className="btn" disabled={sending || !input.trim()}>
