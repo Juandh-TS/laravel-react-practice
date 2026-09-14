@@ -7,7 +7,9 @@ use App\Domains\User\Http\Requests\UpdateUserRequest;
 use App\Domains\User\Http\Resources\UserResource;
 use App\Domains\User\Repositories\Contracts\UserRepositoryInterface;
 use App\Http\Controllers\Controller;
+use OpenApi\Attributes as OA;
 
+#[OA\Tag(name: 'Users', description: 'User management endpoints')]
 class UserController extends Controller
 {
     protected $userRepository;
@@ -20,6 +22,14 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
+    #[OA\Get(
+        path: '/api/users',
+        tags: ['Users'],
+        summary: 'List all users',
+        responses: [
+            new OA\Response(response: 200, description: 'Successful operation'),
+        ]
+    )]
     public function index()
     {
         return UserResource::collection($this->userRepository->getAll());
@@ -39,6 +49,18 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      */
+    #[OA\Get(
+        path: '/api/users/{id}',
+        tags: ['Users'],
+        summary: 'Get a single user',
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Successful operation'),
+            new OA\Response(response: 404, description: 'User not found'),
+        ]
+    )]
     public function show(int $id)
     {
         return new UserResource($this->userRepository->getById($id));
