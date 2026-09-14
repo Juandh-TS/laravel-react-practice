@@ -625,10 +625,25 @@ button {
 .task-list label,
 .task-list .task-content {
   display: flex;
-  align-items: center;
-  gap: 0.65rem;
+  align-items: flex-start;
+  gap: 0.75rem;
   min-width: 0;
   flex: 1;
+}
+
+.task-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.task-header-line {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
 }
 
 .task-actions {
@@ -639,11 +654,12 @@ button {
 }
 
 .task-list input[type='checkbox'] {
-  width: 1.05rem;
-  height: 1.05rem;
+  width: 1.1rem;
+  height: 1.1rem;
   accent-color: var(--color-primary);
   cursor: pointer;
   flex-shrink: 0;
+  margin-top: 0.2rem;
 }
 
 .task-list li.completed label,
@@ -660,6 +676,8 @@ button {
 }
 
 .task-title {
+  font-size: 0.95rem;
+  font-weight: 500;
   overflow-wrap: anywhere;
   cursor: pointer;
   user-select: none;
@@ -734,54 +752,47 @@ button {
   box-shadow: var(--shadow-sm);
 }
 
-.task-filter-user-select {
-  padding: 0.35rem 0.65rem;
-  border-radius: 0.5rem;
-  font-size: 0.8rem;
-  font-family: inherit;
-  background: var(--color-surface);
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
-  outline: none;
-  cursor: pointer;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.task-filter-user-select:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px var(--color-primary-soft);
-}
-
 .task-meta-badges {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.4rem;
-  margin-left: 0.25rem;
+}
+
+.task-assigned-to-badge,
+.task-assigned-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  line-height: 1.35;
+  white-space: nowrap;
 }
 
 .task-assigned-to-badge {
-  font-size: 0.75rem;
   color: var(--color-text);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  padding: 0.15rem 0.5rem;
-  border-radius: 999px;
-  white-space: nowrap;
 }
 
 .task-assigned-to-badge strong {
   color: var(--color-primary);
 }
 
+.task-assigned-to-badge i,
+.task-assigned-badge i {
+  font-size: 0.78rem;
+  color: var(--color-primary);
+}
+
 .task-assigned-badge {
-  font-size: 0.75rem;
   color: var(--color-text-muted);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  padding: 0.15rem 0.5rem;
-  border-radius: 999px;
-  white-space: nowrap;
+}
+
+.task-assigned-badge strong {
+  color: var(--color-text);
 }
 
 .task-edit-form {

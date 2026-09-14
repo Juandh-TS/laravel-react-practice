@@ -102,39 +102,53 @@ export function TaskItem({
               onChange={() => onToggle(task)}
               aria-label={`Marcar como completada: ${task.title}`}
             />
-            <span className="task-title">{task.title}</span>
-            {(() => {
-              const assigner = task.assigned_by ?? task.assignedBy;
-              const assignedDate = task.assigned_at ?? task.assignedAt;
-              const isAssignedToOther =
-                currentUserId && task.user_id !== currentUserId && task.user;
+            <div className="task-body">
+              <div className="task-header-line">
+                <span className="task-title">{task.title}</span>
+                <span
+                  className={`task-scope ${task.company_id ? "shared" : "personal"}`}
+                >
+                  {task.company_id
+                    ? task.user_id === currentUserId
+                      ? "Compartida"
+                      : `De ${task.user?.name ?? "un compañero"}`
+                    : "Personal"}
+                </span>
+              </div>
 
-              return (
-                <div className="task-meta-badges">
-                  {isAssignedToOther && (
-                    <span className="task-assigned-to-badge">
-                      Asignada a: <strong>{task.user?.name}</strong>
-                    </span>
-                  )}
-                  {assigner && assigner.id !== currentUserId && (
-                    <span className="task-assigned-badge">
-                      Asignada por: <strong>{assigner.name}</strong>
-                      {assignedDate &&
-                        ` (${new Date(assignedDate).toLocaleDateString()})`}
-                    </span>
-                  )}
-                </div>
-              );
-            })()}
-            <span
-              className={`task-scope ${task.company_id ? "shared" : "personal"}`}
-            >
-              {task.company_id
-                ? task.user_id === currentUserId
-                  ? "Compartida"
-                  : `De ${task.user?.name ?? "un compañero"}`
-                : "Personal"}
-            </span>
+              {(() => {
+                const assigner = task.assigned_by ?? task.assignedBy;
+                const assignedDate = task.assigned_at ?? task.assignedAt;
+                const isAssignedToOther =
+                  currentUserId && task.user_id !== currentUserId && task.user;
+
+                if (
+                  !isAssignedToOther &&
+                  (!assigner || assigner.id === currentUserId)
+                ) {
+                  return null;
+                }
+
+                return (
+                  <div className="task-meta-badges">
+                    {isAssignedToOther && (
+                      <span className="task-assigned-to-badge">
+                        <i className="bi bi-person-fill" aria-hidden="true" />
+                        Asignada a: <strong>{task.user?.name}</strong>
+                      </span>
+                    )}
+                    {assigner && assigner.id !== currentUserId && (
+                      <span className="task-assigned-badge">
+                        <i className="bi bi-shield-check" aria-hidden="true" />
+                        Asignada por: <strong>{assigner.name}</strong>
+                        {assignedDate &&
+                          ` (${new Date(assignedDate).toLocaleDateString()})`}
+                      </span>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
           </div>
           <div className="task-actions">
             <button
