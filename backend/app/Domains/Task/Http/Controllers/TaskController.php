@@ -2,6 +2,9 @@
 
 namespace App\Domains\Task\Http\Controllers;
 
+use App\Domains\Task\Http\Requests\StoreTaskRequest;
+use App\Domains\Task\Http\Requests\UpdateTaskRequest;
+use App\Domains\Task\Http\Resources\TaskResource;
 use App\Domains\Task\Models\Task;
 use App\Domains\Task\Repositories\Contracts\TaskRepositoryInterface;
 use App\Http\Controllers\Controller;
@@ -21,23 +24,22 @@ class TaskController extends Controller
      */
     public function index(Request $request)
     {
-        return $this->taskRepository->getAllForUser($request->user(), $request->query('filter'));
+        $tasks = $this->taskRepository->getAllForUser($request->user(), $request->query('filter'));
+
+        return TaskResource::collection($tasks);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreTaskRequest $request)
     {
-        $validated = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'user_id' => ['nullable', 'exists:users,id'],
-        ]);
+        $validated = $request->validated();
 
         $validated['company_id'] = $request->user()->company_id;
 
         $authUser = $request->user();
-        
+
         if ($authUser->isAdmin() && !empty($validated['user_id']) && $validated['user_id'] != $authUser->id) {
             $validated['assigned_by_user_id'] = $authUser->id;
             $validated['assigned_at'] = now();
@@ -47,8 +49,9 @@ class TaskController extends Controller
         }
 
         $task = $this->taskRepository->create($validated);
+        $task->load(['user:id,name', 'assignedBy:id,name']);
 
-        return response()->json($task->load(['user:id,name', 'assignedBy:id,name']), 201);
+        return (new TaskResource($task))->response()->setStatusCode(201);
     }
 
     /**
@@ -56,22 +59,19 @@ class TaskController extends Controller
      */
     public function show(Request $request, int $id)
     {
-        return $this->authorizedTask($request, $id);
+        return new TaskResource($this->authorizedTask($request, $id));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, int $id)
+    public function update(UpdateTaskRequest $request, int $id)
     {
         $this->authorizedTask($request, $id);
 
-        $validated = $request->validate([
-            'title' => ['sometimes', 'string', 'max:255'],
-            'completed' => ['sometimes', 'boolean'],
-        ]);
+        $task = $this->taskRepository->update($id, $request->validated());
 
-        return $this->taskRepository->update($id, $validated);
+        return new TaskResource($task);
     }
 
     /**

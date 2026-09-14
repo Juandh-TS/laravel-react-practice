@@ -2,10 +2,11 @@
 
 namespace App\Domains\User\Http\Controllers;
 
+use App\Domains\User\Http\Requests\StoreUserRequest;
+use App\Domains\User\Http\Requests\UpdateUserRequest;
+use App\Domains\User\Http\Resources\UserResource;
 use App\Domains\User\Repositories\Contracts\UserRepositoryInterface;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -21,24 +22,18 @@ class UserController extends Controller
      */
     public function index()
     {
-        return $this->userRepository->getAll();
+        return UserResource::collection($this->userRepository->getAll());
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8'],
-            'company_id' => ['nullable', 'exists:companies,id'],
-        ]);
+        $user = $this->userRepository->create($request->validated());
+        $user->load('company');
 
-        $user = $this->userRepository->create($validated);
-
-        return response()->json($user->load('company'), 201);
+        return (new UserResource($user))->response()->setStatusCode(201);
     }
 
     /**
@@ -46,22 +41,15 @@ class UserController extends Controller
      */
     public function show(int $id)
     {
-        return $this->userRepository->getById($id);
+        return new UserResource($this->userRepository->getById($id));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, int $id)
+    public function update(UpdateUserRequest $request, int $id)
     {
-        $validated = $request->validate([
-            'name' => ['sometimes', 'string', 'max:255'],
-            'email' => ['sometimes', 'email', Rule::unique('users', 'email')->ignore($id)],
-            'password' => ['sometimes', 'string', 'min:8'],
-            'company_id' => ['nullable', 'exists:companies,id'],
-        ]);
-
-        return $this->userRepository->update($id, $validated);
+        return new UserResource($this->userRepository->update($id, $request->validated()));
     }
 
     /**
@@ -79,6 +67,6 @@ class UserController extends Controller
      */
     public function toggleActive(int $id)
     {
-        return $this->userRepository->toggleActive($id);
+        return new UserResource($this->userRepository->toggleActive($id));
     }
 }

@@ -42,7 +42,7 @@ class TaskRepository implements TaskRepositoryInterface
 
     public function getById(int $id)
     {
-        return $this->task->find($id);
+        return $this->task->with(['user:id,name', 'assignedBy:id,name'])->find($id);
     }
 
     public function create(array $data)
@@ -52,7 +52,7 @@ class TaskRepository implements TaskRepositoryInterface
 
     public function update(int $id, array $data)
     {
-        $task = $this->task->find($id);
+        $task = $this->getById($id);
         $task->update($data);
         return $task;
     }
