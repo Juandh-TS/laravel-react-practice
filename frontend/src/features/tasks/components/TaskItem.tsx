@@ -1,4 +1,5 @@
 import { useState, type KeyboardEvent, type MouseEvent, type SyntheticEvent } from 'react'
+import { ConfirmDialog } from '@/components/common/ConfirmDialog'
 import type { Task } from '../types'
 
 interface TaskItemProps {
@@ -13,6 +14,7 @@ export function TaskItem({ task, currentUserId, onToggle, onUpdate, onDelete }: 
   const [isEditing, setIsEditing] = useState(false)
   const [editTitle, setEditTitle] = useState(task.title)
   const [isSaving, setIsSaving] = useState(false)
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
 
   function startEditing() {
     setEditTitle(task.title)
@@ -113,7 +115,7 @@ export function TaskItem({ task, currentUserId, onToggle, onUpdate, onDelete }: 
             <button
               type="button"
               className="icon-btn danger"
-              onClick={() => onDelete(task.id)}
+              onClick={() => setConfirmingDelete(true)}
               aria-label="Borrar tarea"
               title="Borrar tarea"
             >
@@ -122,6 +124,17 @@ export function TaskItem({ task, currentUserId, onToggle, onUpdate, onDelete }: 
           </div>
         </>
       )}
+
+      <ConfirmDialog
+        open={confirmingDelete}
+        title="Borrar tarea"
+        description={`¿Seguro que quieres borrar "${task.title}"? Esta acción no se puede deshacer.`}
+        onConfirm={() => {
+          onDelete(task.id)
+          setConfirmingDelete(false)
+        }}
+        onCancel={() => setConfirmingDelete(false)}
+      />
     </li>
   )
 }

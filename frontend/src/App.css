@@ -182,6 +182,96 @@
   color: var(--color-text);
 }
 
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: color-mix(in srgb, black 45%, transparent);
+  backdrop-filter: blur(2px);
+  z-index: 100;
+  animation: modal-overlay-fade 0.2s ease;
+}
+
+@keyframes modal-overlay-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-dialog {
+  width: 100%;
+  max-width: 24rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+  animation: modal-dialog-in 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes modal-dialog-in {
+  0% {
+    opacity: 0;
+    filter: blur(6px);
+    transform: translateY(10px) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-overlay,
+  .modal-dialog {
+    animation: none;
+  }
+}
+
+.modal-dialog h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.15rem;
+}
+
+.modal-description {
+  margin: 0 0 1.25rem;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
+.btn.secondary {
+  background: none;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+}
+
+.btn.secondary:hover {
+  color: var(--color-text);
+  border-color: var(--color-text-muted);
+}
+
+.btn.danger {
+  background: var(--color-danger);
+  color: #fff;
+}
+
+.btn.danger:hover {
+  background: color-mix(in srgb, var(--color-danger) 85%, black);
+}
+
 .panel {
   background: var(--color-surface);
   border: 1px solid var(--color-border);

@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { ConfirmDialog } from '@/components/common/ConfirmDialog'
 import type { Company } from '@/features/companies/types'
 import type { User, UserInput } from '../types'
 
@@ -18,6 +19,18 @@ export function UserItem({ user, companies, onUpdate, onDelete }: UserItemProps)
     companyId: user.company_id ? String(user.company_id) : '',
   })
   const [isSaving, setIsSaving] = useState(false)
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  async function handleConfirmDelete() {
+    setIsDeleting(true)
+    try {
+      await onDelete(user.id)
+      setConfirmingDelete(false)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
 
   function startEdit() {
     setEditForm({
@@ -132,12 +145,21 @@ export function UserItem({ user, companies, onUpdate, onDelete }: UserItemProps)
         <button
           type="button"
           className="icon-btn danger"
-          onClick={() => onDelete(user.id)}
+          onClick={() => setConfirmingDelete(true)}
           aria-label="Borrar usuario"
         >
           ✕
         </button>
       </div>
+
+      <ConfirmDialog
+        open={confirmingDelete}
+        title="Borrar usuario"
+        description={`¿Seguro que quieres borrar a "${user.name}"? Esta acción no se puede deshacer.`}
+        isConfirming={isDeleting}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setConfirmingDelete(false)}
+      />
     </li>
   )
 }

@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { ConfirmDialog } from '@/components/common/ConfirmDialog'
 import type { Company } from '../types'
 
 interface CompanyItemProps {
@@ -11,6 +12,18 @@ export function CompanyItem({ company, onUpdate, onDelete }: CompanyItemProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [editName, setEditName] = useState(company.name)
   const [isSaving, setIsSaving] = useState(false)
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  async function handleConfirmDelete() {
+    setIsDeleting(true)
+    try {
+      await onDelete(company.id)
+      setConfirmingDelete(false)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
 
   function startEdit() {
     setEditName(company.name)
@@ -88,12 +101,21 @@ export function CompanyItem({ company, onUpdate, onDelete }: CompanyItemProps) {
         <button
           type="button"
           className="icon-btn danger"
-          onClick={() => onDelete(company.id)}
+          onClick={() => setConfirmingDelete(true)}
           aria-label="Borrar empresa"
         >
           ✕
         </button>
       </div>
+
+      <ConfirmDialog
+        open={confirmingDelete}
+        title="Borrar empresa"
+        description={`¿Seguro que quieres borrar "${company.name}"? Esta acción no se puede deshacer.`}
+        isConfirming={isDeleting}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setConfirmingDelete(false)}
+      />
     </li>
   )
 }
