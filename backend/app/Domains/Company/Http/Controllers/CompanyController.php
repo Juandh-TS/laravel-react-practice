@@ -2,10 +2,11 @@
 
 namespace App\Domains\Company\Http\Controllers;
 
+use App\Domains\Company\Http\Requests\StoreCompanyRequest;
+use App\Domains\Company\Http\Requests\UpdateCompanyRequest;
+use App\Domains\Company\Http\Resources\CompanyResource;
 use App\Domains\Company\Repositories\Contracts\CompanyRepositoryInterface;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class CompanyController extends Controller
 {
@@ -21,21 +22,17 @@ class CompanyController extends Controller
      */
     public function index()
     {
-        return $this->companyRepository->getAll();
+        return CompanyResource::collection($this->companyRepository->getAll());
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreCompanyRequest $request)
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'unique:companies,name'],
-        ]);
+        $company = $this->companyRepository->create($request->validated());
 
-        $company = $this->companyRepository->create($validated);
-
-        return response()->json($company, 201);
+        return (new CompanyResource($company))->response()->setStatusCode(201);
     }
 
     /**
@@ -43,19 +40,15 @@ class CompanyController extends Controller
      */
     public function show(int $id)
     {
-        return $this->companyRepository->getById($id);
+        return new CompanyResource($this->companyRepository->getById($id));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, int $id)
+    public function update(UpdateCompanyRequest $request, int $id)
     {
-        $validated = $request->validate([
-            'name' => ['sometimes', 'string', 'max:255', Rule::unique('companies', 'name')->ignore($id)],
-        ]);
-
-        return $this->companyRepository->update($id, $validated);
+        return new CompanyResource($this->companyRepository->update($id, $request->validated()));
     }
 
     /**

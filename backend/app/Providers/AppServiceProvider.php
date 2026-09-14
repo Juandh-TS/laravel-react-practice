@@ -8,6 +8,7 @@ use App\Domains\Task\Repositories\Contracts\TaskRepositoryInterface;
 use App\Domains\Task\Repositories\Eloquent\TaskRepository;
 use App\Domains\User\Repositories\Contracts\UserRepositoryInterface;
 use App\Domains\User\Repositories\Eloquent\UserRepository;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -27,6 +28,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // El frontend consume JSON plano (sin envoltorio "data"); esto es lo
+        // único que realmente controla el wrapping en Resource::collection(),
+        // ya que la propiedad estática $wrap por clase no lo hace.
+        JsonResource::withoutWrapping();
     }
 }
