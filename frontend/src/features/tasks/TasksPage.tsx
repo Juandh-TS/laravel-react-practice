@@ -87,7 +87,7 @@ export function TasksPage() {
         Tareas
         {!loading && !error && <Badge count={tasks.length} />}
       </h1>
-      <p className="subtitle">React 19 + Vite consumiendo la API de Laravel</p>
+      <p className="subtitle">Gestiona tus tareas diarias</p>
 
       <TaskForm onSubmit={handleCreate} />
 
