@@ -1,7 +1,9 @@
 .app {
   max-width: 34rem;
   margin: 0 auto;
-  padding: 2.5rem 1.5rem 4rem;
+  /* padding-top deja espacio fijo para el reloj (arriba-izq.) y la racha del cursor (arriba-der.),
+     ambos con position: fixed, para que nunca se superpongan con el header en anchos intermedios. */
+  padding: 5rem 1.5rem 4rem;
 }
 
 .header-bar {
@@ -676,7 +678,7 @@ button {
 
 @media (max-width: 480px) {
   .app {
-    padding: 1.5rem 1rem 3rem;
+    padding: 5rem 1rem 3rem;
   }
 
   .panel {
