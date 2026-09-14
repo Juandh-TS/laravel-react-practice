@@ -25,7 +25,9 @@ export function Header({ brand = 'Bienvenido/a:' }: HeaderProps) {
   return (
     <div className="header-bar">
       <p className="brand">
-        {brand}
+        <span className="brand-greeting" data-text={brand}>
+          {brand}
+        </span>
         {user && <span className="header-user">{user.name}</span>}
       </p>
       <div className="header-actions">
