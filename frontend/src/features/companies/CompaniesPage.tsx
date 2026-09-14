@@ -17,7 +17,7 @@ export function CompaniesPage() {
     companiesApi
       .list()
       .then(setCompanies)
-      .catch(() => setError('No se pudo conectar con la API. ¿Corriste "php artisan serve" en backend/?'))
+      .catch(() => setError('No se pudo conectar con la API. Asegurate que el backend esté corriendo.'))
       .finally(() => setLoading(false))
   }, [])
 

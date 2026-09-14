@@ -19,7 +19,7 @@ export function TasksPage() {
     tasksApi
       .list()
       .then(setTasks)
-      .catch(() => setError('No se pudo conectar con la API. ¿Corriste "php artisan serve" en backend/?'))
+      .catch(() => setError('No se pudo conectar con la API. Asegurate que el backend esté corriendo.'))
       .finally(() => setLoading(false))
   }, [])
 
