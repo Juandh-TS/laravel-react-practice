@@ -10,6 +10,7 @@ import {
 import { PageContainer } from "@/components/layout/PageContainer";
 import { AuthPage } from "@/features/auth/components/AuthPage";
 import { AuthProvider, useAuth } from "@/features/auth/context/AuthContext";
+import { ChatWidget } from "@/features/chatbot/components/ChatWidget";
 import { TasksPage } from "@/features/tasks/TasksPage";
 import { UsersPage } from "@/features/users/UsersPage";
 import { CompaniesPage } from "@/features/companies/CompaniesPage";
@@ -44,6 +45,7 @@ function AppShell() {
         {activeTab === "users" && <UsersPage />}
         {activeTab === "companies" && <CompaniesPage />}
       </PageContainer>
+      <ChatWidget />
     </main>
   );
 }
