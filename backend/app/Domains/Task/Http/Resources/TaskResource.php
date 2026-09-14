@@ -21,7 +21,7 @@ class TaskResource extends JsonResource
                 'id' => $this->user->id,
                 'name' => $this->user->name,
             ] : null),
-            'assignedBy' => $this->whenLoaded('assignedBy', fn () => $this->assignedBy ? [
+            'assigned_by' => $this->whenLoaded('assignedBy', fn () => $this->assignedBy ? [
                 'id' => $this->assignedBy->id,
                 'name' => $this->assignedBy->name,
             ] : null),

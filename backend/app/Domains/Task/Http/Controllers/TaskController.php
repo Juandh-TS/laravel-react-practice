@@ -70,14 +70,13 @@ class TaskController extends Controller
         $task = $this->authorizedTask($request, $id);
         $user = $request->user();
 
-        // regla de actualizacion de tarea
+        // Regla de actualización: No se puede editar si fue asignada por otra persona (admin)
         if ($task->assigned_by_user_id && $task->assigned_by_user_id !== $user->id && !$user->isAdmin()) {
             abort(403, "No se puede editar una tarea asignada por un administrador");
         }
-        $validated = $request->validate([
-            'title' => ['sometimes', 'string', 'max:255'],
-            'completed' => ['sometimes', 'boolean'],
-        ]);
+
+        $task = $this->taskRepository->update($id, $request->validated());
+        $task->load(['user:id,name', 'assignedBy:id,name']);
 
         return new TaskResource($task);
     }
