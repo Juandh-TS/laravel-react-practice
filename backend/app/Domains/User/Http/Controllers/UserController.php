@@ -26,6 +26,7 @@ class UserController extends Controller
         path: '/api/users',
         tags: ['Users'],
         summary: 'List all users',
+        security: [['sanctum' => []]],
         responses: [
             new OA\Response(response: 200, description: 'Successful operation'),
         ]
@@ -38,6 +39,16 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+    #[OA\Post(
+        path: '/api/users',
+        tags: ['Users'],
+        summary: 'Create a new user',
+        security: [['sanctum' => []]],
+        responses: [
+            new OA\Response(response: 201, description: 'User created'),
+            new OA\Response(response: 422, description: 'Validation error'),
+        ]
+    )]
     public function store(StoreUserRequest $request)
     {
         $user = $this->userRepository->create($request->validated());
@@ -53,6 +64,7 @@ class UserController extends Controller
         path: '/api/users/{id}',
         tags: ['Users'],
         summary: 'Get a single user',
+        security: [['sanctum' => []]],
         parameters: [
             new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
         ],
@@ -69,6 +81,20 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
+    #[OA\Put(
+        path: '/api/users/{id}',
+        tags: ['Users'],
+        summary: 'Update a user',
+        security: [['sanctum' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'User updated'),
+            new OA\Response(response: 404, description: 'User not found'),
+            new OA\Response(response: 422, description: 'Validation error'),
+        ]
+    )]
     public function update(UpdateUserRequest $request, int $id)
     {
         return new UserResource($this->userRepository->update($id, $request->validated()));
@@ -77,6 +103,19 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
+    #[OA\Delete(
+        path: '/api/users/{id}',
+        tags: ['Users'],
+        summary: 'Delete a user',
+        security: [['sanctum' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: 204, description: 'User deleted'),
+            new OA\Response(response: 404, description: 'User not found'),
+        ]
+    )]
     public function destroy(int $id)
     {
         $this->userRepository->delete($id);
@@ -87,6 +126,19 @@ class UserController extends Controller
     /**
      * Toggle the active status of the specified resource.
      */
+    #[OA\Patch(
+        path: '/api/users/{id}/toggle-active',
+        tags: ['Users'],
+        summary: 'Toggle a user\'s active status',
+        security: [['sanctum' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'User status toggled'),
+            new OA\Response(response: 404, description: 'User not found'),
+        ]
+    )]
     public function toggleActive(int $id)
     {
         return new UserResource($this->userRepository->toggleActive($id));

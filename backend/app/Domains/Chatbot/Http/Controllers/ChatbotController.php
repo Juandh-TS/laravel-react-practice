@@ -9,7 +9,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use OpenApi\Attributes as OA;
 
+#[OA\Tag(name: 'Chatbot', description: 'Chatbot assistant endpoint')]
 class ChatbotController extends Controller
 {
     public function __construct(
@@ -23,6 +25,18 @@ class ChatbotController extends Controller
      * Answer a question using the data currently visible in the app
      * (the same tasks/users/companies the authenticated user can already see).
      */
+    #[OA\Post(
+        path: '/api/chatbot/ask',
+        tags: ['Chatbot'],
+        summary: 'Ask the chatbot assistant a question',
+        security: [['sanctum' => []]],
+        responses: [
+            new OA\Response(response: 200, description: 'Successful operation'),
+            new OA\Response(response: 422, description: 'Validation error'),
+            new OA\Response(response: 502, description: 'Chatbot upstream request failed'),
+            new OA\Response(response: 503, description: 'Chatbot not configured'),
+        ]
+    )]
     public function ask(Request $request)
     {
         $validated = $request->validate([

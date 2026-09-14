@@ -7,12 +7,23 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use OpenApi\Attributes as OA;
 
+#[OA\Tag(name: 'Auth', description: 'Authentication endpoints')]
 class AuthController extends Controller
 {
     /**
      * Register a new user and issue an API token.
      */
+    #[OA\Post(
+        path: '/api/register',
+        tags: ['Auth'],
+        summary: 'Register a new user',
+        responses: [
+            new OA\Response(response: 201, description: 'User registered'),
+            new OA\Response(response: 422, description: 'Validation error'),
+        ]
+    )]
     public function register(Request $request)
     {
         $validated = $request->validate([
@@ -40,6 +51,15 @@ class AuthController extends Controller
     /**
      * Authenticate a user and issue an API token.
      */
+    #[OA\Post(
+        path: '/api/login',
+        tags: ['Auth'],
+        summary: 'Authenticate a user',
+        responses: [
+            new OA\Response(response: 200, description: 'Successful login'),
+            new OA\Response(response: 422, description: 'Invalid credentials'),
+        ]
+    )]
     public function login(Request $request)
     {
         $validated = $request->validate([
@@ -74,6 +94,15 @@ class AuthController extends Controller
     /**
      * Revoke the token used for the current request.
      */
+    #[OA\Post(
+        path: '/api/logout',
+        tags: ['Auth'],
+        summary: 'Revoke the current access token',
+        security: [['sanctum' => []]],
+        responses: [
+            new OA\Response(response: 204, description: 'Successfully logged out'),
+        ]
+    )]
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
@@ -84,6 +113,15 @@ class AuthController extends Controller
     /**
      * Return the authenticated user.
      */
+    #[OA\Get(
+        path: '/api/me',
+        tags: ['Auth'],
+        summary: 'Get the authenticated user',
+        security: [['sanctum' => []]],
+        responses: [
+            new OA\Response(response: 200, description: 'Successful operation'),
+        ]
+    )]
     public function me(Request $request)
     {
         return $request->user()->load('company');
