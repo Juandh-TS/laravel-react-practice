@@ -421,6 +421,50 @@ button {
   border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
 }
 
+.task-item[data-tooltip] {
+  position: relative;
+}
+
+.task-item[data-tooltip]::after,
+.task-item[data-tooltip]::before {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.task-item[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 0.45rem);
+  left: 0.85rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 0.45rem;
+  background: var(--color-primary);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: var(--shadow-md);
+}
+
+.task-item[data-tooltip]::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 1.15rem;
+  border: 5px solid transparent;
+  border-top-color: var(--color-primary);
+}
+
+.task-item[data-tooltip]:hover::after,
+.task-item[data-tooltip]:hover::before {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0.35s;
+}
+
 .task-list label,
 .task-list .task-content {
   display: flex;

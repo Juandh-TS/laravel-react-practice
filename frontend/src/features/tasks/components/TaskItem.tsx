@@ -67,7 +67,7 @@ export function TaskItem({ task, currentUserId, onToggle, onUpdate, onDelete }: 
     <li
       className={`task-item ${task.completed ? 'completed done' : ''} ${isEditing ? 'editing' : ''} ${isSaving ? 'saving' : ''}`}
       onDoubleClick={handleDoubleClick}
-      title={!isEditing ? 'Doble clic para editar' : undefined}
+      data-tooltip={!isEditing ? 'Doble clic para editar' : undefined}
     >
       {isEditing ? (
         <form onSubmit={handleSave} className="task-edit-form">
