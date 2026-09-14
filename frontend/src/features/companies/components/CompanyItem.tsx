@@ -104,7 +104,7 @@ export function CompanyItem({ company, onUpdate, onDelete }: CompanyItemProps) {
           onClick={() => setConfirmingDelete(true)}
           aria-label="Borrar empresa"
         >
-          ✕
+          <i className="bi bi-trash"></i>
         </button>
       </div>
 

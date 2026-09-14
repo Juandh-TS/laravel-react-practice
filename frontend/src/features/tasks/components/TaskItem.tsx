@@ -119,7 +119,7 @@ export function TaskItem({ task, currentUserId, onToggle, onUpdate, onDelete }: 
               aria-label="Borrar tarea"
               title="Borrar tarea"
             >
-              ✕
+              <i className="bi bi-trash"></i>
             </button>
           </div>
         </>

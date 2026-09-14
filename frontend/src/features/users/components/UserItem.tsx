@@ -148,7 +148,7 @@ export function UserItem({ user, companies, onUpdate, onDelete }: UserItemProps)
           onClick={() => setConfirmingDelete(true)}
           aria-label="Borrar usuario"
         >
-          ✕
+          <i className="bi bi-trash"></i>
         </button>
       </div>
 
