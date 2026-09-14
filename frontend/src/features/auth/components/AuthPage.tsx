@@ -9,7 +9,6 @@ export function AuthPage() {
     <div className="auth-page">
       <div className="panel auth-panel">
         <h1>{mode === 'login' ? 'Iniciar sesión' : 'Crear cuenta'}</h1>
-        <p className="subtitle">Laravel + React Practice</p>
         {mode === 'login' ? (
           <LoginForm onSwitch={() => setMode('register')} />
         ) : (
