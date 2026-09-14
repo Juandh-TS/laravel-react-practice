@@ -530,13 +530,15 @@ button {
 
 .user-list > li {
   align-items: center;
+  flex-wrap: wrap;
 }
 
-.user-info {
+.user-content {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   min-width: 0;
+  flex: 1 1 auto;
 }
 
 .user-avatar {
@@ -556,11 +558,15 @@ button {
 .user-details {
   display: flex;
   flex-direction: column;
+  gap: 0.15rem;
   min-width: 0;
 }
 
 .user-details strong {
   font-size: 0.95rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .user-email {
@@ -571,17 +577,42 @@ button {
   white-space: nowrap;
 }
 
-.company-tag {
+.user-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.2rem;
+}
+
+.company-tag,
+.status-tag {
   display: inline-block;
-  align-self: flex-start;
-  margin-top: 0.3rem;
   padding: 0.1rem 0.5rem;
   border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.company-tag {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   color: var(--color-text-muted);
-  font-size: 0.7rem;
-  font-weight: 500;
+}
+
+.status-tag {
+  font-weight: 600;
+}
+
+.status-tag.status-active {
+  background: color-mix(in srgb, var(--color-success) 14%, transparent);
+  color: var(--color-success);
+}
+
+.status-tag.status-inactive {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
 }
 
 .user-actions,
@@ -589,6 +620,10 @@ button {
   display: flex;
   gap: 0.35rem;
   flex-shrink: 0;
+}
+
+.user-actions {
+  margin-left: auto;
 }
 
 .user-edit-form {

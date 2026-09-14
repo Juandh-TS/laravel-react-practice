@@ -8,9 +8,10 @@ interface UserItemProps {
   companies: Company[]
   onUpdate: (id: number, data: Partial<UserInput>) => Promise<void>
   onDelete: (id: number) => Promise<void>
+  onToggleActive: (id: number) => Promise<void>
 }
 
-export function UserItem({ user, companies, onUpdate, onDelete }: UserItemProps) {
+export function UserItem({ user, companies, onUpdate, onDelete, onToggleActive }: UserItemProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [editForm, setEditForm] = useState({
     name: user.name,
@@ -21,6 +22,16 @@ export function UserItem({ user, companies, onUpdate, onDelete }: UserItemProps)
   const [isSaving, setIsSaving] = useState(false)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isTogglingActive, setIsTogglingActive] = useState(false)
+
+  async function handleToggleActive() {
+    setIsTogglingActive(true)
+    try {
+      await onToggleActive(user.id)
+    } finally {
+      setIsTogglingActive(false)
+    }
+  }
 
   async function handleConfirmDelete() {
     setIsDeleting(true)
@@ -121,16 +132,19 @@ export function UserItem({ user, companies, onUpdate, onDelete }: UserItemProps)
 
   return (
     <li>
-      <div className="user-header" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <div className="user-content">
         <span className="user-avatar">{user.name.charAt(0).toUpperCase()}</span>
-        <strong>{user.name}</strong>
-      </div>
-      <div className="user-card">
         <div className="user-details">
+          <strong>{user.name}</strong>
           <span className="user-email">{user.email}</span>
-          <span className="company-tag" style={{ marginTop: '10px' }}>
-            {user.company ? user.company.name : 'Sin empresa'}
-          </span>
+          <div className="user-tags">
+            <span className="company-tag">
+              {user.company ? user.company.name : 'Sin empresa'}
+            </span>
+            <span className={`status-tag ${user.is_active ? 'status-active' : 'status-inactive'}`}>
+              {user.is_active ? 'Activo' : 'Inactivo'}
+            </span>
+          </div>
         </div>
       </div>
       <div className="user-actions">
@@ -141,6 +155,17 @@ export function UserItem({ user, companies, onUpdate, onDelete }: UserItemProps)
           aria-label="Editar usuario"
         >
           ✎
+        </button>
+        <button
+          type="button"
+          className="icon-btn"
+          onClick={handleToggleActive}
+          disabled={isTogglingActive}
+          aria-pressed={user.is_active}
+          aria-label={user.is_active ? 'Desactivar usuario' : 'Activar usuario'}
+          title={user.is_active ? 'Desactivar usuario' : 'Activar usuario'}
+        >
+          <i className={`bi ${user.is_active ? 'bi-toggle2-on' : 'bi-toggle2-off'}`}></i>
         </button>
         <button
           type="button"

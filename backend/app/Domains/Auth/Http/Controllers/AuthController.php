@@ -55,6 +55,14 @@ class AuthController extends Controller
             ]);
         }
 
+        if (! $user->is_active) {
+            throw ValidationException::withMessages([
+                'email' => ['Esta cuenta está inactiva. Contacta a un administrador.'],
+            ]);
+        }
+
+        $user->forceFill(['last_login_at' => now()])->save();
+
         $token = $user->createToken('spa')->plainTextToken;
 
         return response()->json([

@@ -62,6 +62,18 @@ export function UsersPage() {
     }
   }
 
+  async function handleToggleActive(id: number) {
+    setFormError(null)
+    try {
+      const updated = await usersApi.toggleActive(id)
+      setUsers((current) =>
+        current.map((u) => (u.id === id ? { ...u, ...updated } : u)),
+      )
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'No se pudo cambiar el estado del usuario.')
+    }
+  }
+
   return (
     <>
       <h1>
@@ -89,6 +101,7 @@ export function UsersPage() {
             companies={companies}
             onUpdate={handleUpdate}
             onDelete={handleDelete}
+            onToggleActive={handleToggleActive}
           />
         ))}
       </ul>

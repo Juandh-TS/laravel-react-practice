@@ -22,4 +22,9 @@ export const usersApi = {
     request<void>(`/users/${id}`, {
       method: 'DELETE',
     }),
+
+  toggleActive: (id: number) =>
+    request<User>(`/users/${id}/toggle-active`, {
+      method: 'PATCH',
+    }),
 }

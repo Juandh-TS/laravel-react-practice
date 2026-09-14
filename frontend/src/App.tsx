@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { CursorEffect } from '@/components/common/CursorEffect'
+import { LiveClock } from '@/components/common/LiveClock'
 import { Spinner } from '@/components/common/Spinner'
 import { Header } from '@/components/layout/Header'
 import { NavigationTabs, type TabType } from '@/components/layout/NavigationTabs'
@@ -47,6 +48,7 @@ function AppShell() {
 export function App() {
   return (
     <AuthProvider>
+      <LiveClock />
       <CursorEffect />
       <AppShell />
     </AuthProvider>

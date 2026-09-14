@@ -6,6 +6,8 @@ export interface User {
   email: string
   company_id: number | null
   company: Company | null
+  is_active: boolean
+  last_login_at: string | null
   created_at: string
   updated_at: string
 }

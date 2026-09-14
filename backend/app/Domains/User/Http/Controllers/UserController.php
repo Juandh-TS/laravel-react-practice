@@ -73,4 +73,12 @@ class UserController extends Controller
 
         return response()->noContent();
     }
+
+    /**
+     * Toggle the active status of the specified resource.
+     */
+    public function toggleActive(int $id)
+    {
+        return $this->userRepository->toggleActive($id);
+    }
 }

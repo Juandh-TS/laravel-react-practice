@@ -42,4 +42,12 @@ class UserRepository implements UserRepositoryInterface
         $user->delete();
         return $user;
     }
+
+    public function toggleActive(int $id)
+    {
+        $user = $this->getById($id);
+        $user->is_active = ! $user->is_active;
+        $user->save();
+        return $user->load('company');
+    }
 }
