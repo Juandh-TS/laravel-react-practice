@@ -9,9 +9,7 @@ export interface Task {
   assigned_by_user_id?: number | null
   user?: { id: number; name: string } | null
   assigned_by?: { id: number; name: string } | null
-  assignedBy?: { id: number; name: string } | null
   assigned_at?: string | null
-  assignedAt?: string | null
   created_at: string
   updated_at: string
 }

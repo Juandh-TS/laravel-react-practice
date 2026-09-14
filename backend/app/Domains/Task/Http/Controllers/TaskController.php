@@ -64,8 +64,13 @@ class TaskController extends Controller
      */
     public function update(Request $request, int $id)
     {
-        $this->authorizedTask($request, $id);
+        $task = $this->authorizedTask($request, $id);
+        $user = $request->user();
 
+        // regla de actualizacion de tarea
+        if ($task->assigned_by_user_id && $task->assigned_by_user_id !== $user->id && !$user->isAdmin()) {
+            abort(403, "No se puede editar una tarea asignada por un administrador");
+        }
         $validated = $request->validate([
             'title' => ['sometimes', 'string', 'max:255'],
             'completed' => ['sometimes', 'boolean'],
@@ -79,7 +84,13 @@ class TaskController extends Controller
      */
     public function destroy(Request $request, int $id)
     {
-        $this->authorizedTask($request, $id);
+        $task = $this->authorizedTask($request, $id);
+        $user = $request->user();
+
+        // Regla de eliminación de tarea: no se puede eliminar si fue asignada por otra persona (admin)
+        if ($task->assigned_by_user_id && $task->assigned_by_user_id !== $user->id && !$user->isAdmin()) {
+            abort(403, "No se puede eliminar una tarea asignada por un administrador");
+        }
 
         $this->taskRepository->delete($id);
 

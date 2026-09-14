@@ -27,6 +27,12 @@ export function TaskItem({
   const [isSaving, setIsSaving] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
+  const isAssignedByOther = Boolean(
+    task.assigned_by_user_id && task.assigned_by_user_id !== currentUserId,
+  );
+  const canEdit = !isAssignedByOther;
+  const canDelete = !isAssignedByOther;
+
   function startEditing() {
     setEditTitle(task.title);
     setIsEditing(true);
@@ -38,6 +44,8 @@ export function TaskItem({
   }
 
   function handleDoubleClick(e: MouseEvent<HTMLLIElement>) {
+    if (!canEdit) return;
+
     const target = e.target as HTMLElement;
     // Ignore double click if clicking directly on buttons or checkboxes
     if (target.closest("button") || target.tagName === "INPUT") {
@@ -78,7 +86,7 @@ export function TaskItem({
     <li
       className={`task-item ${task.completed ? "completed done" : ""} ${isEditing ? "editing" : ""} ${isSaving ? "saving" : ""}`}
       onDoubleClick={handleDoubleClick}
-      data-tooltip={!isEditing ? "Doble clic para editar" : undefined}
+      data-tooltip={!isEditing && canEdit ? "Doble clic para editar" : undefined}
     >
       {isEditing ? (
         <form onSubmit={handleSave} className="task-edit-form">
@@ -117,8 +125,8 @@ export function TaskItem({
               </div>
 
               {(() => {
-                const assigner = task.assigned_by ?? task.assignedBy;
-                const assignedDate = task.assigned_at ?? task.assignedAt;
+                const assigner = task.assigned_by;
+                const assignedDate = task.assigned_at;
                 const isAssignedToOther =
                   currentUserId && task.user_id !== currentUserId && task.user;
 
@@ -151,24 +159,38 @@ export function TaskItem({
             </div>
           </div>
           <div className="task-actions">
-            <button
-              type="button"
-              className="icon-btn"
-              onClick={startEditing}
-              aria-label="Editar tarea"
-              title="Editar tarea"
-            >
-              ✎
-            </button>
-            <button
-              type="button"
-              className="icon-btn danger"
-              onClick={() => setConfirmingDelete(true)}
-              aria-label="Borrar tarea"
-              title="Borrar tarea"
-            >
-              <i className="bi bi-trash"></i>
-            </button>
+            {canEdit && (
+              <button
+                type="button"
+                className="icon-btn"
+                onClick={startEditing}
+                aria-label="Editar tarea"
+                title="Editar tarea"
+              >
+                <i className="bi bi-pencil-square" aria-hidden="true" />
+              </button>
+            )}
+            {canDelete && (
+              <button
+                type="button"
+                className="icon-btn danger"
+                onClick={() => setConfirmingDelete(true)}
+                aria-label="Borrar tarea"
+                title="Borrar tarea"
+              >
+                <i className="bi bi-trash" aria-hidden="true" />
+              </button>
+            )}
+            {!canEdit && !canDelete && (
+              <span
+                className="icon-btn"
+                style={{ opacity: 0.5, cursor: "not-allowed" }}
+                title="Solo el administrador puede modificar o eliminar esta tarea"
+                aria-label="Tarea bloqueada"
+              >
+                <i className="bi bi-lock-fill" aria-hidden="true" />
+              </span>
+            )}
           </div>
         </>
       )}
