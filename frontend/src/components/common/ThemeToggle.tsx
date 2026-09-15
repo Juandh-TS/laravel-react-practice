@@ -46,7 +46,7 @@ export function ThemeToggle() {
       aria-pressed={theme === 'dark'}
       title={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
     >
-      {theme === 'dark' ? 'Modo oscuro' : 'Modo claro'}
+      {theme === 'dark' ? '☀️ Modo claro' : '🌙 Modo oscuro'}
     </button>
   )
 }
