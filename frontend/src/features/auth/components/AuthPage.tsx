@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ThemeToggle } from '@/components/common/ThemeToggle'
 import { LoginForm } from './LoginForm'
 import { RegisterForm } from './RegisterForm'
 
@@ -7,6 +8,9 @@ export function AuthPage() {
 
   return (
     <div className="auth-page">
+      <div className="theme-toggle-container">
+        <ThemeToggle />
+      </div>
       <div className="panel auth-panel">
         <h1>{mode === 'login' ? 'Iniciar sesión' : 'Crear cuenta'}</h1>
         {mode === 'login' ? (
