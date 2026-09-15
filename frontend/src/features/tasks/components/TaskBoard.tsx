@@ -59,7 +59,6 @@ export function TaskBoard({
             tasks={tasks.filter((t) => t.status === status)}
             currentUserId={currentUserId}
             onSelect={onSelect}
-            onStatusChange={onStatusChange}
           />
         ))}
       </div>
