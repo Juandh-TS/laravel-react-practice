@@ -120,7 +120,7 @@ export function TaskItem({
                 >
                   {task.company_id
                     ? task.user_id === currentUserId
-                      ? "Tareas dentro de la empresa "
+                      ? "Mí tarea"
                       : `De ${task.user?.name ?? "un compañero"}`
                     : "Personal"}
                 </span>

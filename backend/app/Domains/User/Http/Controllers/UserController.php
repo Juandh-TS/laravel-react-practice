@@ -5,19 +5,16 @@ namespace App\Domains\User\Http\Controllers;
 use App\Domains\User\Http\Requests\StoreUserRequest;
 use App\Domains\User\Http\Requests\UpdateUserRequest;
 use App\Domains\User\Http\Resources\UserResource;
-use App\Domains\User\Repositories\Contracts\UserRepositoryInterface;
+use App\Domains\User\Services\UserService;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 
 #[OA\Tag(name: 'Users', description: 'User management endpoints')]
 class UserController extends Controller
 {
-    protected $userRepository;
 
-    public function __construct(UserRepositoryInterface $userRepository)
-    {
-        $this->userRepository = $userRepository;
-    }
+    public function __construct(protected UserService $userService) {}
 
     /**
      * Display a listing of the resource.
@@ -33,7 +30,7 @@ class UserController extends Controller
     )]
     public function index()
     {
-        return UserResource::collection($this->userRepository->getAll());
+        return UserResource::collection($this->userService->getAll());
     }
 
     /**
@@ -51,7 +48,7 @@ class UserController extends Controller
     )]
     public function store(StoreUserRequest $request)
     {
-        $user = $this->userRepository->create($request->validated());
+        $user = $this->userService->create($request->validated(), $request->user());
         $user->load('company');
 
         return (new UserResource($user))->response()->setStatusCode(201);
@@ -75,7 +72,7 @@ class UserController extends Controller
     )]
     public function show(int $id)
     {
-        return new UserResource($this->userRepository->getById($id));
+        return new UserResource($this->userService->getById($id));
     }
 
     /**
@@ -97,7 +94,7 @@ class UserController extends Controller
     )]
     public function update(UpdateUserRequest $request, int $id)
     {
-        return new UserResource($this->userRepository->update($id, $request->validated()));
+        return new UserResource($this->userService->update($id, $request->validated(), $request->user()));
     }
 
     /**
@@ -116,9 +113,9 @@ class UserController extends Controller
             new OA\Response(response: 404, description: 'User not found'),
         ]
     )]
-    public function destroy(int $id)
+    public function destroy(int $id, Request $request)
     {
-        $this->userRepository->delete($id);
+        $this->userService->delete($id, $request->user());
 
         return response()->noContent();
     }
@@ -139,8 +136,8 @@ class UserController extends Controller
             new OA\Response(response: 404, description: 'User not found'),
         ]
     )]
-    public function toggleActive(int $id)
+    public function toggleActive(int $id, Request $request)
     {
-        return new UserResource($this->userRepository->toggleActive($id));
+        return new UserResource($this->userService->toggleActive($id, $request->user()));
     }
 }

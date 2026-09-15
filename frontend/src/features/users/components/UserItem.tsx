@@ -6,12 +6,20 @@ import type { User, UserInput } from '../types'
 interface UserItemProps {
   user: User
   companies: Company[]
+  isAdmin?: boolean
   onUpdate: (id: number, data: Partial<UserInput>) => Promise<void>
   onDelete: (id: number) => Promise<void>
   onToggleActive: (id: number) => Promise<void>
 }
 
-export function UserItem({ user, companies, onUpdate, onDelete, onToggleActive }: UserItemProps) {
+export function UserItem({
+  user,
+  companies,
+  isAdmin = false,
+  onUpdate,
+  onDelete,
+  onToggleActive,
+}: UserItemProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [editForm, setEditForm] = useState({
     name: user.name,
@@ -25,6 +33,7 @@ export function UserItem({ user, companies, onUpdate, onDelete, onToggleActive }
   const [isTogglingActive, setIsTogglingActive] = useState(false)
 
   async function handleToggleActive() {
+    if (!isAdmin) return
     setIsTogglingActive(true)
     try {
       await onToggleActive(user.id)
@@ -34,6 +43,7 @@ export function UserItem({ user, companies, onUpdate, onDelete, onToggleActive }
   }
 
   async function handleConfirmDelete() {
+    if (!isAdmin) return
     setIsDeleting(true)
     try {
       await onDelete(user.id)
@@ -44,6 +54,7 @@ export function UserItem({ user, companies, onUpdate, onDelete, onToggleActive }
   }
 
   function startEdit() {
+    if (!isAdmin) return
     setEditForm({
       name: user.name,
       email: user.email,
@@ -59,7 +70,7 @@ export function UserItem({ user, companies, onUpdate, onDelete, onToggleActive }
 
   async function handleSave(e: FormEvent) {
     e.preventDefault()
-    if (!editForm.name.trim() || !editForm.email.trim() || isSaving) return
+    if (!editForm.name.trim() || !editForm.email.trim() || isSaving || !isAdmin) return
 
     setIsSaving(true)
     try {
@@ -148,33 +159,48 @@ export function UserItem({ user, companies, onUpdate, onDelete, onToggleActive }
         </div>
       </div>
       <div className="user-actions">
-        <button
-          type="button"
-          className="icon-btn"
-          onClick={startEdit}
-          aria-label="Editar usuario"
-        >
-          ✎
-        </button>
-        <button
-          type="button"
-          className="icon-btn"
-          onClick={handleToggleActive}
-          disabled={isTogglingActive}
-          aria-pressed={user.is_active}
-          aria-label={user.is_active ? 'Desactivar usuario' : 'Activar usuario'}
-          title={user.is_active ? 'Desactivar usuario' : 'Activar usuario'}
-        >
-          <i className={`bi ${user.is_active ? 'bi-toggle2-on' : 'bi-toggle2-off'}`}></i>
-        </button>
-        <button
-          type="button"
-          className="icon-btn danger"
-          onClick={() => setConfirmingDelete(true)}
-          aria-label="Borrar usuario"
-        >
-          <i className="bi bi-trash"></i>
-        </button>
+        {isAdmin ? (
+          <>
+            <button
+              type="button"
+              className="icon-btn"
+              onClick={startEdit}
+              aria-label="Editar usuario"
+              title="Editar usuario"
+            >
+              ✎
+            </button>
+            <button
+              type="button"
+              className="icon-btn"
+              onClick={handleToggleActive}
+              disabled={isTogglingActive}
+              aria-pressed={user.is_active}
+              aria-label={user.is_active ? 'Desactivar usuario' : 'Activar usuario'}
+              title={user.is_active ? 'Desactivar usuario' : 'Activar usuario'}
+            >
+              <i className={`bi ${user.is_active ? 'bi-toggle2-on' : 'bi-toggle2-off'}`}></i>
+            </button>
+            <button
+              type="button"
+              className="icon-btn danger"
+              onClick={() => setConfirmingDelete(true)}
+              aria-label="Borrar usuario"
+              title="Borrar usuario"
+            >
+              <i className="bi bi-trash"></i>
+            </button>
+          </>
+        ) : (
+          <span
+            className="icon-btn has-tooltip"
+            data-tooltip="Solo administradores pueden editar o gestionar usuarios"
+            style={{ opacity: 0.5, cursor: 'not-allowed' }}
+            aria-label="Usuario bloqueado"
+          >
+            <i className="bi bi-lock-fill" aria-hidden="true" />
+          </span>
+        )}
       </div>
 
       <ConfirmDialog

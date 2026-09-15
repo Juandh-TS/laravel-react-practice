@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Badge } from '@/components/common/Badge'
 import { ErrorAlert } from '@/components/common/ErrorAlert'
 import { Spinner } from '@/components/common/Spinner'
+import { useAuth } from '@/features/auth/context/AuthContext'
 import { companiesApi } from '@/features/companies/api/companiesApi'
 import type { Company } from '@/features/companies/types'
 import { usersApi } from './api/usersApi'
@@ -10,11 +11,14 @@ import { UserItem } from './components/UserItem'
 import type { User, UserInput } from './types'
 
 export function UsersPage() {
+  const { user: authUser } = useAuth()
   const [users, setUsers] = useState<User[]>([])
   const [companies, setCompanies] = useState<Company[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [formError, setFormError] = useState<string | null>(null)
+
+  const isAdmin = authUser?.role === 'admin'
 
   useEffect(() => {
     usersApi
@@ -82,7 +86,7 @@ export function UsersPage() {
       </h1>
       <p className="subtitle">Gestión de usuarios y empresas asociadas</p>
 
-      <UserForm companies={companies} onSubmit={handleCreate} />
+      {isAdmin && <UserForm companies={companies} onSubmit={handleCreate} />}
 
       <ErrorAlert message={formError} />
       <ErrorAlert message={error} />
@@ -99,6 +103,7 @@ export function UsersPage() {
             key={user.id}
             user={user}
             companies={companies}
+            isAdmin={isAdmin}
             onUpdate={handleUpdate}
             onDelete={handleDelete}
             onToggleActive={handleToggleActive}
