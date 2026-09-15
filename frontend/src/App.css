@@ -156,6 +156,9 @@
 }
 
 .theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   padding: 0.4rem 0.85rem;
   border: 1px solid var(--color-border);
   border-radius: 999px;
@@ -169,8 +172,15 @@
 }
 
 .theme-toggle:hover {
-  color: var(--color-text);
+  color: var(--color-primary);
   border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
+}
+
+.theme-toggle-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
 }
 
 .tabs {
