@@ -11,7 +11,7 @@ export function AuthPage() {
       <div className="theme-toggle-container">
         <ThemeToggle />
       </div>
-      <div className="panel auth-panel">
+      <div className="auth-panel">
         <h1>{mode === 'login' ? 'Iniciar sesión' : 'Crear cuenta'}</h1>
         {mode === 'login' ? (
           <LoginForm onSwitch={() => setMode('register')} />
