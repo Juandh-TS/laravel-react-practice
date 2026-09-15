@@ -24,8 +24,7 @@ class TaskService
     public function createTask(User $authUser, array $data): Task
     {
         $tagIds = $data['tag_ids'] ?? null;
-        unset($data['tag_ids']);
-
+        unset($data['tag_ids']);        
         $data['company_id'] = $authUser->company_id;
 
         if ($authUser->isAdmin() && !empty($data['user_id']) && $data['user_id'] != $authUser->id) {

@@ -53,7 +53,11 @@ export function TasksPage() {
     }
   }, [isAdmin]);
 
-  async function handleCreate(title: string, userId?: number, priority?: Priority) {
+  async function handleCreate(
+    title: string,
+    userId?: number,
+    priority?: Priority,
+  ) {
     setFormError(null);
     try {
       await tasksApi.create({ title, user_id: userId, priority });
@@ -113,7 +117,6 @@ export function TasksPage() {
       throw err;
     }
   }
-
 
   async function handleDelete(id: number) {
     const deletedTask = tasks.find((t) => t.id === id);
