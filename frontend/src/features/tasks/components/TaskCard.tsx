@@ -1,21 +1,14 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { TASK_STATUSES, TASK_STATUS_LABELS } from "../types";
-import type { Task, TaskStatus } from "../types";
+import type { Task } from "../types";
 
 interface TaskCardProps {
   task: Task;
   currentUserId?: number;
   onSelect: (task: Task) => void;
-  onStatusChange: (task: Task, status: TaskStatus) => void;
 }
 
-export function TaskCard({
-  task,
-  currentUserId,
-  onSelect,
-  onStatusChange,
-}: TaskCardProps) {
+export function TaskCard({ task, currentUserId, onSelect }: TaskCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: task.id });
 
@@ -32,7 +25,7 @@ export function TaskCard({
     <li
       ref={setNodeRef}
       style={style}
-      className={`task-card status-${task.status} ${isDragging ? "dragging" : ""}`}
+      className={`task-card ${isDragging ? "dragging" : ""}`}
       onClick={() => onSelect(task)}
       {...attributes}
       {...listeners}
@@ -65,31 +58,14 @@ export function TaskCard({
         </div>
       )}
 
-      <div className="task-card-footer">
-        <select
-          className="task-card-status-select"
-          value={task.status}
-          onClick={(e) => e.stopPropagation()}
-          onPointerDown={(e) => e.stopPropagation()}
-          onChange={(e) =>
-            onStatusChange(task, e.target.value as TaskStatus)
-          }
-          aria-label={`Cambiar estado de: ${task.title}`}
-        >
-          {TASK_STATUSES.map((status) => (
-            <option key={status} value={status}>
-              {TASK_STATUS_LABELS[status]}
-            </option>
-          ))}
-        </select>
-
-        {!!task.comments_count && (
+      {!!task.comments_count && (
+        <div className="task-card-footer">
           <span className="task-card-comments">
             <i className="bi bi-chat-left-text" aria-hidden="true" />
             {task.comments_count}
           </span>
-        )}
-      </div>
+        </div>
+      )}
     </li>
   );
 }
