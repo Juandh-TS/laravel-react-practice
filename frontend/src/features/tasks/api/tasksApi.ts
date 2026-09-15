@@ -20,6 +20,7 @@ export const tasksApi = {
       completed: boolean
       status: TaskStatus
       priority: Priority
+      position: number
       start_date: string | null
       end_date: string | null
       tag_ids: number[]

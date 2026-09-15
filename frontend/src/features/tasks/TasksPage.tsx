@@ -70,16 +70,17 @@ export function TasksPage() {
     }
   }
 
-  async function handleStatusChange(task: Task, status: TaskStatus) {
+  async function handleReorder(task: Task, status: TaskStatus, position: number) {
     const previousStatus = task.status;
+    const previousPosition = task.position;
 
     // Optimistic update: cambiar inmediatamente en la UI
     setTasks((current) =>
-      current.map((t) => (t.id === task.id ? { ...t, status } : t)),
+      current.map((t) => (t.id === task.id ? { ...t, status, position } : t)),
     );
 
     try {
-      const updated = await tasksApi.update(task.id, { status });
+      const updated = await tasksApi.update(task.id, { status, position });
       setTasks((current) =>
         current.map((t) => (t.id === task.id ? updated : t)),
       );
@@ -87,7 +88,9 @@ export function TasksPage() {
       // Revertir estado en caso de error
       setTasks((current) =>
         current.map((t) =>
-          t.id === task.id ? { ...t, status: previousStatus } : t,
+          t.id === task.id
+            ? { ...t, status: previousStatus, position: previousPosition }
+            : t,
         ),
       );
       setFormError(
@@ -199,7 +202,7 @@ export function TasksPage() {
           tasks={tasks}
           currentUserId={user?.id}
           onSelect={(task) => setSelectedTaskId(task.id)}
-          onStatusChange={handleStatusChange}
+          onReorder={handleReorder}
         />
       )}
 

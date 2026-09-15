@@ -24,6 +24,7 @@ class UpdateTaskRequest extends FormRequest
             'start_date' => ['sometimes', 'nullable', 'date'],
             'end_date' => ['sometimes', 'nullable', 'date', 'after_or_equal:start_date'],
             'priority' => ['sometimes', Rule::in(Task::PRIORITIES)],
+            'position' => ['sometimes', 'numeric'],
             'tag_ids' => ['sometimes', 'array'],
             'tag_ids.*' => ['integer', 'exists:tags,id'],
             'user_id' => ['sometimes', 'nullable', 'exists:users,id'],

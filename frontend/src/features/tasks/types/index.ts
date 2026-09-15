@@ -34,6 +34,7 @@ export interface Task {
   completed: boolean
   status: TaskStatus
   priority: Priority
+  position: number | null
   start_date: string | null
   end_date: string | null
   comments_count?: number

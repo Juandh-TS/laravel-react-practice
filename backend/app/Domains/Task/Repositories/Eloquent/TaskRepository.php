@@ -33,7 +33,7 @@ class TaskRepository implements TaskRepositoryInterface
             });
         }
 
-        return $query->latest()->get();
+        return $query->orderBy('position')->latest()->get();
     }
 
     public function getById(int $id): ?Task
@@ -69,5 +69,10 @@ class TaskRepository implements TaskRepositoryInterface
     public function syncTags(Task $task, array $tagIds): void
     {
         $task->tags()->sync($tagIds);
+    }
+
+    public function getMaxPosition(string $status): ?float
+    {
+        return $this->task->where('status', $status)->max('position');
     }
 }

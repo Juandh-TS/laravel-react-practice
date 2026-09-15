@@ -16,6 +16,7 @@ class TaskResource extends JsonResource
             'completed' => $this->completed,
             'status' => $this->status,
             'priority' => $this->priority ?? 'medium',
+            'position' => $this->position,
             'start_date' => $this->start_date?->toDateString(),
             'end_date' => $this->end_date?->toDateString(),
             'comments_count' => $this->whenCounted('comments'),

@@ -28,6 +28,7 @@ class Task extends Model
         'completed',
         'status',
         'priority',
+        'position',
         'start_date',
         'end_date',
         'user_id',
@@ -79,6 +80,7 @@ class Task extends Model
             'assigned_at' => 'datetime',
             'start_date' => 'date',
             'end_date' => 'date',
+            'position' => 'float',
         ];
     }
 }

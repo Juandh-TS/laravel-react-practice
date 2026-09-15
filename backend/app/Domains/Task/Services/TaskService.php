@@ -24,8 +24,11 @@ class TaskService
     public function createTask(User $authUser, array $data): Task
     {
         $tagIds = $data['tag_ids'] ?? null;
-        unset($data['tag_ids']);        
+        unset($data['tag_ids']);
         $data['company_id'] = $authUser->company_id;
+
+        $status = $data['status'] ?? Task::STATUSES[0];
+        $data['position'] = ($this->taskRepository->getMaxPosition($status) ?? 0) + 1000;
 
         if ($authUser->isAdmin() && !empty($data['user_id']) && $data['user_id'] != $authUser->id) {
             $data['assigned_by_user_id'] = $authUser->id;
@@ -63,6 +66,14 @@ class TaskService
                 $data['assigned_by_user_id'] = $user->id;
                 $data['assigned_at'] = now();
             }
+        }
+
+        if (
+            array_key_exists('status', $data) &&
+            $data['status'] !== $task->status &&
+            !array_key_exists('position', $data)
+        ) {
+            $data['position'] = ($this->taskRepository->getMaxPosition($data['status']) ?? 0) + 1000;
         }
 
         $tagIds = $data['tag_ids'] ?? null;

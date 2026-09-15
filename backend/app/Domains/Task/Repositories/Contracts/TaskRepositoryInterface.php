@@ -14,4 +14,5 @@ interface TaskRepositoryInterface
     public function update(int $id, array $data): Task;
     public function delete(int $id): bool;
     public function syncTags(Task $task, array $tagIds): void;
+    public function getMaxPosition(string $status): ?float;
 }
