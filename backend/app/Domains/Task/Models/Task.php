@@ -4,12 +4,14 @@ namespace App\Domains\Task\Models;
 
 use App\Domains\Comment\Models\Comment;
 use App\Domains\Company\Models\Company;
+use App\Domains\Tag\Models\Tag;
 use App\Domains\User\Models\User;
 use Database\Factories\TaskFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -19,17 +21,19 @@ class Task extends Model
     use HasFactory, SoftDeletes;
 
     public const STATUSES = ['todo', 'in_progress', 'done'];
+    public const PRIORITIES = ['low', 'medium', 'high', 'urgent'];
 
     protected $fillable = [
         'title',
         'completed',
         'status',
+        'priority',
         'start_date',
         'end_date',
         'user_id',
         'company_id',
         'assigned_by_user_id',
-        'assigned_at'
+        'assigned_at',
     ];
 
     public function user(): BelongsTo
@@ -51,6 +55,12 @@ class Task extends Model
     {
         return $this->hasMany(Comment::class);
     }
+
+    public function tags(): BelongsToMany
+    {
+        return $this->belongsToMany(Tag::class, 'tag_task');
+    }
+
 
     /**
      * Mantiene `completed` sincronizado con `status` para no romper

@@ -1,11 +1,12 @@
 import type { User } from "@/types";
 import { useState, type FormEvent } from "react";
+import { PRIORITIES, PRIORITY_LABELS, type Priority } from "../types";
 
 interface TaskFormProps {
   isAdmin?: boolean;
   users?: User[];
   currentUserId?: number;
-  onSubmit: (title: string, userId?: number) => Promise<void>;
+  onSubmit: (title: string, userId?: number, priority?: Priority) => Promise<void>;
 }
 
 export function TaskForm({
@@ -15,6 +16,7 @@ export function TaskForm({
   onSubmit,
 }: TaskFormProps) {
   const [title, setTitle] = useState("");
+  const [priority, setPriority] = useState<Priority>("medium");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [assignedUserId, setAssignedUserId] = useState<number | undefined>(
     undefined,
@@ -27,8 +29,9 @@ export function TaskForm({
 
     setIsSubmitting(true);
     try {
-      await onSubmit(trimmed, assignedUserId);
+      await onSubmit(trimmed, assignedUserId, priority);
       setTitle("");
+      setPriority("medium");
       setAssignedUserId(undefined);
     } finally {
       setIsSubmitting(false);
@@ -47,6 +50,22 @@ export function TaskForm({
             disabled={isSubmitting}
             className="task-form-input"
           />
+
+          <div className="task-form-priority-wrapper">
+            <select
+              className="task-form-priority-select"
+              value={priority}
+              onChange={(e) => setPriority(e.target.value as Priority)}
+              disabled={isSubmitting}
+              aria-label="Prioridad de la tarea"
+            >
+              {PRIORITIES.map((p) => (
+                <option key={p} value={p}>
+                  {PRIORITY_LABELS[p]}
+                </option>
+              ))}
+            </select>
+          </div>
 
           {isAdmin && (
             <div className="task-form-assign-wrapper">
@@ -90,3 +109,4 @@ export function TaskForm({
     </form>
   );
 }
+

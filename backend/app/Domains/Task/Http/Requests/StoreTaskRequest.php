@@ -21,8 +21,13 @@ class StoreTaskRequest extends FormRequest
             'title' => ['required', 'string', 'max:255'],
             'user_id' => ['nullable', 'exists:users,id'],
             'status' => ['sometimes', Rule::in(Task::STATUSES)],
+            'priority' => ['sometimes', Rule::in(Task::PRIORITIES)],
             'start_date' => ['sometimes', 'nullable', 'date'],
             'end_date' => ['sometimes', 'nullable', 'date', 'after_or_equal:start_date'],
+            'tag_ids' => ['sometimes', 'array'],
+            'tag_ids.*' => ['integer', 'exists:tags,id'],
         ];
     }
 }
+
+

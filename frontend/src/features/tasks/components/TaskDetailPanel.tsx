@@ -1,8 +1,20 @@
 import { useEffect, useState } from "react";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
-import { TASK_STATUSES, TASK_STATUS_LABELS } from "../types";
-import type { Task, TaskStatus } from "../types";
+import { tagsApi } from "../api/tagsApi";
+import { PRIORITIES, PRIORITY_LABELS, TASK_STATUSES, TASK_STATUS_LABELS } from "../types";
+import type { Priority, Tag, Task, TaskStatus } from "../types";
 import { TaskComments } from "./TaskComments";
+
+const TAG_COLOR_PALETTE = [
+  "#6366f1", // Indigo
+  "#10b981", // Emerald
+  "#f59e0b", // Amber
+  "#f43f5e", // Rose
+  "#0ea5e9", // Sky
+  "#a855f7", // Purple
+  "#ec4899", // Pink
+  "#14b8a6", // Teal
+];
 
 interface TaskDetailPanelProps {
   task: Task | null;
@@ -13,8 +25,10 @@ interface TaskDetailPanelProps {
     data: Partial<{
       title: string;
       status: TaskStatus;
+      priority: Priority;
       start_date: string | null;
       end_date: string | null;
+      tag_ids: number[];
     }>,
   ) => Promise<void>;
   onDelete: (id: number) => void;
@@ -31,10 +45,26 @@ export function TaskDetailPanel({
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Tags state
+  const [availableTags, setAvailableTags] = useState<Tag[]>([]);
+  const [isCreatingTag, setIsCreatingTag] = useState(false);
+  const [newTagName, setNewTagName] = useState("");
+  const [newTagColor, setNewTagColor] = useState(TAG_COLOR_PALETTE[0]);
+  const [isSavingTag, setIsSavingTag] = useState(false);
+
   useEffect(() => {
     setTitle(task?.title ?? "");
     setError(null);
+    setIsCreatingTag(false);
+    setNewTagName("");
   }, [task]);
+
+  useEffect(() => {
+    tagsApi
+      .list()
+      .then(setAvailableTags)
+      .catch((err) => console.error("Error al cargar tags:", err));
+  }, []);
 
   useEffect(() => {
     if (!task) return;
@@ -78,6 +108,16 @@ export function TaskDetailPanel({
     }
   }
 
+  async function handlePriorityChange(priority: Priority) {
+    try {
+      await onUpdate(task!.id, { priority });
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "No se pudo actualizar la prioridad.",
+      );
+    }
+  }
+
   async function handleDateChange(field: "start_date" | "end_date", value: string) {
     try {
       await onUpdate(task!.id, { [field]: value || null });
@@ -87,6 +127,60 @@ export function TaskDetailPanel({
       );
     }
   }
+
+  async function handleRemoveTag(tagIdToRemove: number) {
+    const currentTagIds = (task?.tags ?? []).map((t) => t.id);
+    const nextTagIds = currentTagIds.filter((id) => id !== tagIdToRemove);
+    try {
+      await onUpdate(task!.id, { tag_ids: nextTagIds });
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "No se pudo remover el tag.",
+      );
+    }
+  }
+
+  async function handleAddExistingTag(tagIdToAdd: number) {
+    if (!tagIdToAdd) return;
+    const currentTagIds = (task?.tags ?? []).map((t) => t.id);
+    if (currentTagIds.includes(tagIdToAdd)) return;
+    const nextTagIds = [...currentTagIds, tagIdToAdd];
+    try {
+      await onUpdate(task!.id, { tag_ids: nextTagIds });
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "No se pudo agregar el tag.",
+      );
+    }
+  }
+
+  async function handleCreateAndAttachTag() {
+    const trimmed = newTagName.trim();
+    if (!trimmed || isSavingTag) return;
+    setIsSavingTag(true);
+    try {
+      const createdTag = await tagsApi.create(trimmed, newTagColor);
+      setAvailableTags((prev) => {
+        if (prev.some((t) => t.id === createdTag.id)) return prev;
+        return [...prev, createdTag];
+      });
+
+      const currentTagIds = (task?.tags ?? []).map((t) => t.id);
+      await onUpdate(task!.id, { tag_ids: [...currentTagIds, createdTag.id] });
+
+      setNewTagName("");
+      setIsCreatingTag(false);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "No se pudo crear el tag.",
+      );
+    } finally {
+      setIsSavingTag(false);
+    }
+  }
+
+  const assignedTagIds = new Set((task.tags ?? []).map((t) => t.id));
+  const unassignedTags = availableTags.filter((t) => !assignedTagIds.has(t.id));
 
   return (
     <div className="task-detail-overlay" role="presentation" onClick={onClose}>
@@ -133,19 +227,160 @@ export function TaskDetailPanel({
           <h2 className="task-detail-title">{task.title}</h2>
         )}
 
-        <div className="task-detail-field">
-          <label htmlFor="task-detail-status">Estado</label>
-          <select
-            id="task-detail-status"
-            value={task.status}
-            onChange={(e) => handleStatusChange(e.target.value as TaskStatus)}
-          >
-            {TASK_STATUSES.map((status) => (
-              <option key={status} value={status}>
-                {TASK_STATUS_LABELS[status]}
-              </option>
-            ))}
-          </select>
+        <div className="task-detail-row">
+          <div className="task-detail-field">
+            <label htmlFor="task-detail-status">Estado</label>
+            <select
+              id="task-detail-status"
+              value={task.status}
+              onChange={(e) => handleStatusChange(e.target.value as TaskStatus)}
+            >
+              {TASK_STATUSES.map((status) => (
+                <option key={status} value={status}>
+                  {TASK_STATUS_LABELS[status]}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="task-detail-field">
+            <label htmlFor="task-detail-priority">Prioridad</label>
+            <select
+              id="task-detail-priority"
+              value={task.priority ?? "medium"}
+              onChange={(e) => handlePriorityChange(e.target.value as Priority)}
+            >
+              {PRIORITIES.map((priority) => (
+                <option key={priority} value={priority}>
+                  {PRIORITY_LABELS[priority]}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Tags management */}
+        <div className="task-detail-tags-section">
+          <div className="task-detail-tags-header">
+            <label className="task-detail-tags-label">
+              <i className="bi bi-tags-fill" aria-hidden="true" /> Tags
+            </label>
+            {!isCreatingTag && (
+              <button
+                type="button"
+                className="task-tag-add-btn"
+                onClick={() => setIsCreatingTag(true)}
+              >
+                <i className="bi bi-plus" aria-hidden="true" /> Nuevo tag
+              </button>
+            )}
+          </div>
+
+          <div className="task-detail-tags-list">
+            {task.tags && task.tags.length > 0 ? (
+              task.tags.map((tag) => (
+                <span
+                  key={tag.id}
+                  className="tag-chip-editable"
+                  style={{
+                    backgroundColor: `${tag.color}20`,
+                    borderColor: `${tag.color}55`,
+                    color: tag.color,
+                  }}
+                >
+                  #{tag.name}
+                  <button
+                    type="button"
+                    className="tag-chip-remove-btn"
+                    onClick={() => handleRemoveTag(tag.id)}
+                    title={`Quitar tag ${tag.name}`}
+                    aria-label={`Quitar tag ${tag.name}`}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))
+            ) : (
+              <span className="task-no-tags-text">Sin tags asignados</span>
+            )}
+          </div>
+
+          {unassignedTags.length > 0 && !isCreatingTag && (
+            <div className="task-add-existing-tag">
+              <select
+                className="task-tag-select"
+                defaultValue=""
+                onChange={(e) => {
+                  if (e.target.value) {
+                    handleAddExistingTag(Number(e.target.value));
+                    e.target.value = "";
+                  }
+                }}
+              >
+                <option value="" disabled>
+                  + Agregar tag existente...
+                </option>
+                {unassignedTags.map((tag) => (
+                  <option key={tag.id} value={tag.id}>
+                    #{tag.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {isCreatingTag && (
+            <div className="task-create-tag-box">
+              <div className="task-create-tag-inputs">
+                <input
+                  type="text"
+                  placeholder="Nombre del tag..."
+                  value={newTagName}
+                  onChange={(e) => setNewTagName(e.target.value)}
+                  className="task-create-tag-input"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleCreateAndAttachTag();
+                    }
+                  }}
+                />
+                <div className="task-tag-color-picker">
+                  {TAG_COLOR_PALETTE.map((color) => (
+                    <button
+                      key={color}
+                      type="button"
+                      className={`task-tag-color-swatch ${newTagColor === color ? "active" : ""}`}
+                      style={{ backgroundColor: color }}
+                      onClick={() => setNewTagColor(color)}
+                      aria-label={`Color ${color}`}
+                    />
+                  ))}
+                </div>
+              </div>
+              <div className="task-create-tag-actions">
+                <button
+                  type="button"
+                  className="btn btn-sm primary"
+                  onClick={handleCreateAndAttachTag}
+                  disabled={!newTagName.trim() || isSavingTag}
+                >
+                  {isSavingTag ? "Guardando..." : "Crear y asignar"}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-sm secondary"
+                  onClick={() => {
+                    setIsCreatingTag(false);
+                    setNewTagName("");
+                  }}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="task-detail-dates">
@@ -211,3 +446,4 @@ export function TaskDetailPanel({
     </div>
   );
 }
+

@@ -5,15 +5,16 @@ namespace App\Domains\Task\Repositories\Eloquent;
 use App\Domains\Task\Models\Task;
 use App\Domains\Task\Repositories\Contracts\TaskRepositoryInterface;
 use App\Domains\User\Models\User;
+use Illuminate\Database\Eloquent\Collection;
 
 class TaskRepository implements TaskRepositoryInterface
 {
-    public function __construct(protected Task $task){}
+    public function __construct(protected Task $task) {}
 
-    public function getAllForUser(User $user, ?string $filter = null)
+    public function getAllForUser(User $user, ?string $filter = null): Collection
     {
         $query = $this->task->query()
-            ->with(['user:id,name', 'assignedBy:id,name'])
+            ->with(['user:id,name', 'assignedBy:id,name', 'tags'])
             ->withCount('comments');
 
         if ($filter === 'assigned_to_me') {
@@ -35,27 +36,38 @@ class TaskRepository implements TaskRepositoryInterface
         return $query->latest()->get();
     }
 
-    public function getById(int $id)
+    public function getById(int $id): ?Task
     {
-        return $this->task->with(['user:id,name', 'assignedBy:id,name'])->withCount('comments')->find($id);
+        return $this->task->with(['user:id,name', 'assignedBy:id,name', 'tags'])
+            ->withCount('comments')
+            ->find($id);
     }
 
-    public function create(array $data)
+    public function create(array $data): Task
     {
         return $this->task->create($data);
     }
 
-    public function update(int $id, array $data)
+    public function update(int $id, array $data): Task
     {
-        $task = $this->getById($id);
+        $task = $this->task->findOrFail($id);
         $task->update($data);
+
         return $task;
     }
 
-    public function delete(int $id)
+    public function delete(int $id): bool
     {
         $task = $this->task->find($id);
-        $task->delete();
-        return $task;
+        if (!$task) {
+            return false;
+        }
+
+        return (bool) $task->delete();
+    }
+
+    public function syncTags(Task $task, array $tagIds): void
+    {
+        $task->tags()->sync($tagIds);
     }
 }

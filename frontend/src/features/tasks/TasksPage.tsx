@@ -9,7 +9,7 @@ import { tasksApi } from "./api/tasksApi";
 import { TaskBoard } from "./components/TaskBoard";
 import { TaskDetailPanel } from "./components/TaskDetailPanel";
 import { TaskForm } from "./components/TaskForm";
-import type { Task, TaskFilter, TaskStatus } from "./types";
+import type { Priority, Task, TaskFilter, TaskStatus } from "./types";
 
 export function TasksPage() {
   const { user } = useAuth();
@@ -53,10 +53,10 @@ export function TasksPage() {
     }
   }, [isAdmin]);
 
-  async function handleCreate(title: string, userId?: number) {
+  async function handleCreate(title: string, userId?: number, priority?: Priority) {
     setFormError(null);
     try {
-      await tasksApi.create(title, userId);
+      await tasksApi.create({ title, user_id: userId, priority });
       await loadTasks(filter);
     } catch (err) {
       setFormError(
@@ -97,8 +97,10 @@ export function TasksPage() {
     data: Partial<{
       title: string;
       status: TaskStatus;
+      priority: Priority;
       start_date: string | null;
       end_date: string | null;
+      tag_ids: number[];
     }>,
   ) {
     try {
@@ -111,6 +113,7 @@ export function TasksPage() {
       throw err;
     }
   }
+
 
   async function handleDelete(id: number) {
     const deletedTask = tasks.find((t) => t.id === id);

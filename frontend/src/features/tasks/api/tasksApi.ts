@@ -1,5 +1,5 @@
 import { request } from '@/api/client'
-import type { Task, TaskFilter, TaskStatus } from '../types'
+import type { Priority, Task, TaskFilter, TaskStatus } from '../types'
 
 export const tasksApi = {
   list: (filter?: TaskFilter) => {
@@ -7,10 +7,10 @@ export const tasksApi = {
     return request<Task[]>(`/tasks${query}`)
   },
 
-  create: (title: string, userId?: number) =>
+  create: (data: { title: string; user_id?: number; priority?: Priority; tag_ids?: number[] }) =>
     request<Task>('/tasks', {
       method: 'POST',
-      body: JSON.stringify({ title, user_id: userId }),
+      body: JSON.stringify(data),
     }),
 
   update: (
@@ -19,8 +19,10 @@ export const tasksApi = {
       title: string
       completed: boolean
       status: TaskStatus
+      priority: Priority
       start_date: string | null
       end_date: string | null
+      tag_ids: number[]
     }>,
   ) =>
     request<Task>(`/tasks/${id}`, {
@@ -33,3 +35,4 @@ export const tasksApi = {
       method: 'DELETE',
     }),
 }
+

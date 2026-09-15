@@ -1,6 +1,6 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { Task } from "../types";
+import { PRIORITY_LABELS, type Task } from "../types";
 
 interface TaskCardProps {
   task: Task;
@@ -30,7 +30,32 @@ export function TaskCard({ task, currentUserId, onSelect }: TaskCardProps) {
       {...attributes}
       {...listeners}
     >
-      <div className="task-card-title">{task.title}</div>
+      <div className="task-card-header-row">
+        <div className="task-card-title">{task.title}</div>
+        {task.priority && (
+          <span className={`badge-priority badge-priority--${task.priority}`}>
+            {PRIORITY_LABELS[task.priority] ?? task.priority}
+          </span>
+        )}
+      </div>
+
+      {task.tags && task.tags.length > 0 && (
+        <div className="task-card-tags">
+          {task.tags.map((tag) => (
+            <span
+              key={tag.id}
+              className="tag-chip"
+              style={{
+                backgroundColor: `${tag.color}22`,
+                borderColor: `${tag.color}66`,
+                color: tag.color,
+              }}
+            >
+              #{tag.name}
+            </span>
+          ))}
+        </div>
+      )}
 
       {(isAssignedToOther || (assigner && assigner.id !== currentUserId)) && (
         <div className="task-card-meta">
@@ -69,3 +94,4 @@ export function TaskCard({ task, currentUserId, onSelect }: TaskCardProps) {
     </li>
   );
 }
+

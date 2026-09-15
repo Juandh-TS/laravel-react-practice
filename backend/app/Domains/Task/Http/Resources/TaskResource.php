@@ -2,6 +2,7 @@
 
 namespace App\Domains\Task\Http\Resources;
 
+use App\Domains\Tag\Http\Resources\TagResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -14,6 +15,7 @@ class TaskResource extends JsonResource
             'title' => $this->title,
             'completed' => $this->completed,
             'status' => $this->status,
+            'priority' => $this->priority ?? 'medium',
             'start_date' => $this->start_date?->toDateString(),
             'end_date' => $this->end_date?->toDateString(),
             'comments_count' => $this->whenCounted('comments'),
@@ -21,6 +23,7 @@ class TaskResource extends JsonResource
             'company_id' => $this->company_id,
             'assigned_by_user_id' => $this->assigned_by_user_id,
             'assigned_at' => $this->assigned_at,
+            'tags' => TagResource::collection($this->whenLoaded('tags')),
             'user' => $this->whenLoaded('user', fn () => $this->user ? [
                 'id' => $this->user->id,
                 'name' => $this->user->name,
@@ -34,3 +37,4 @@ class TaskResource extends JsonResource
         ];
     }
 }
+

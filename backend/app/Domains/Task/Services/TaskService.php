@@ -21,8 +21,11 @@ class TaskService
         return $this->authorizedTask($user, $id);
     }
 
-    public function createTask(User $authUser, array $data)
+    public function createTask(User $authUser, array $data): Task
     {
+        $tagIds = $data['tag_ids'] ?? null;
+        unset($data['tag_ids']);
+
         $data['company_id'] = $authUser->company_id;
 
         if ($authUser->isAdmin() && !empty($data['user_id']) && $data['user_id'] != $authUser->id) {
@@ -34,7 +37,11 @@ class TaskService
 
         $task = $this->taskRepository->create($data);
 
-        return $task->load(['user:id,name', 'assignedBy:id,name']);
+        if ($tagIds !== null) {
+            $this->taskRepository->syncTags($task, $tagIds);
+        }
+
+        return $task->load(['user:id,name', 'assignedBy:id,name', 'tags']);
     }
 
     public function updateTask(User $user, int $id, array $data): Task
@@ -50,10 +57,19 @@ class TaskService
             }
         }
 
+        $tagIds = $data['tag_ids'] ?? null;
+        unset($data['tag_ids']);
+
         $task = $this->taskRepository->update($id, $data);
 
-        return $task->load(['user:id,name', 'assignedBy:id,name']);
+        if ($tagIds !== null) {
+            $this->taskRepository->syncTags($task, $tagIds);
+        }
+
+        return $task->load(['user:id,name', 'assignedBy:id,name', 'tags']);
     }
+
+
 
     public function deleteTask(User $user, int $id): void
     {

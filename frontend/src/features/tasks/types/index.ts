@@ -10,11 +10,30 @@ export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
   done: 'Hecho',
 }
 
+export type Priority = 'low' | 'medium' | 'high' | 'urgent'
+
+export const PRIORITIES: Priority[] = ['low', 'medium', 'high', 'urgent']
+
+export const PRIORITY_LABELS: Record<Priority, string> = {
+  low: 'Baja',
+  medium: 'Media',
+  high: 'Alta',
+  urgent: 'Urgente',
+}
+
+export interface Tag {
+  id: number
+  name: string
+  color: string
+  company_id?: number | null
+}
+
 export interface Task {
   id: number
   title: string
   completed: boolean
   status: TaskStatus
+  priority: Priority
   start_date: string | null
   end_date: string | null
   comments_count?: number
@@ -24,6 +43,7 @@ export interface Task {
   user?: { id: number; name: string } | null
   assigned_by?: { id: number; name: string } | null
   assigned_at?: string | null
+  tags?: Tag[]
   created_at: string
   updated_at: string
 }
@@ -36,3 +56,4 @@ export interface Comment {
   created_at: string
   updated_at: string
 }
+
