@@ -6,19 +6,15 @@ use App\Domains\Company\Http\Requests\StoreCompanyRequest;
 use App\Domains\Company\Http\Requests\UpdateCompanyRequest;
 use App\Domains\Company\Http\Resources\CompanyResource;
 use App\Domains\Company\Repositories\Contracts\CompanyRepositoryInterface;
+use App\Domains\Company\Services\CompanyService;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 
 #[OA\Tag(name: 'Companies', description: 'Company management endpoints')]
 class CompanyController extends Controller
 {
-    protected $companyRepository;
-
-    public function __construct(CompanyRepositoryInterface $companyRepository)
-    {
-        $this->companyRepository = $companyRepository;
-    }
-
+    public function __construct(protected CompanyService $companyService){}
     /**
      * Display a listing of the resource.
      */
@@ -31,9 +27,11 @@ class CompanyController extends Controller
             new OA\Response(response: 200, description: 'Successful operation'),
         ]
     )]
-    public function index()
+    public function index(Request $request)
     {
-        return CompanyResource::collection($this->companyRepository->getAll());
+       $companies = $this->companyService->getAll($request->user());
+
+       return CompanyResource::collection($companies);
     }
 
     /**
@@ -51,7 +49,7 @@ class CompanyController extends Controller
     )]
     public function store(StoreCompanyRequest $request)
     {
-        $company = $this->companyRepository->create($request->validated());
+        $company = $this->companyService->create($request->validated(), $request->user());
 
         return (new CompanyResource($company))->response()->setStatusCode(201);
     }
@@ -74,7 +72,7 @@ class CompanyController extends Controller
     )]
     public function show(int $id)
     {
-        return new CompanyResource($this->companyRepository->getById($id));
+        return new CompanyResource($this->companyService->getById($id));
     }
 
     /**
@@ -96,7 +94,7 @@ class CompanyController extends Controller
     )]
     public function update(UpdateCompanyRequest $request, int $id)
     {
-        return new CompanyResource($this->companyRepository->update($id, $request->validated()));
+        return new CompanyResource($this->companyService->update($id, $request->validated(), $request->user()));
     }
 
     /**
@@ -115,9 +113,9 @@ class CompanyController extends Controller
             new OA\Response(response: 404, description: 'Company not found'),
         ]
     )]
-    public function destroy(int $id)
+    public function destroy(int $id, Request $request)
     {
-        $this->companyRepository->delete($id);
+        $this->companyService->delete($id, $request->user());
 
         return response()->noContent();
     }

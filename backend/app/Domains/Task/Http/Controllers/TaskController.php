@@ -5,22 +5,16 @@ namespace App\Domains\Task\Http\Controllers;
 use App\Domains\Task\Http\Requests\StoreTaskRequest;
 use App\Domains\Task\Http\Requests\UpdateTaskRequest;
 use App\Domains\Task\Http\Resources\TaskResource;
-use App\Domains\Task\Models\Task;
-use App\Domains\Task\Repositories\Contracts\TaskRepositoryInterface;
+use App\Domains\Task\Services\TaskService;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 #[OA\Tag(name: 'Tasks', description: 'Task management endpoints')]
 class TaskController extends Controller
 {
-    protected $taskRepository;
-
-    public function __construct(TaskRepositoryInterface $taskRepository)
-    {
-        $this->taskRepository = $taskRepository;
-    }
+    public function __construct(protected TaskService $taskService) {}
+    
     /**
      * Display a listing of the resource.
      */
@@ -38,7 +32,7 @@ class TaskController extends Controller
     )]
     public function index(Request $request)
     {
-        $tasks = $this->taskRepository->getAllForUser($request->user(), $request->query('filter'));
+        $tasks = $this->taskService->listTasks($request->user(), $request->query('filter'));
 
         return TaskResource::collection($tasks);
     }
@@ -58,22 +52,7 @@ class TaskController extends Controller
     )]
     public function store(StoreTaskRequest $request)
     {
-        $validated = $request->validated();
-
-        $validated['company_id'] = $request->user()->company_id;
-
-        $authUser = $request->user();
-
-        if ($authUser->isAdmin() && !empty($validated['user_id']) && $validated['user_id'] != $authUser->id) {
-            $validated['assigned_by_user_id'] = $authUser->id;
-            $validated['assigned_at'] = now();
-        } else {
-            // Si no es admin se le asgin a a el mismo
-            $validated['user_id'] = $authUser->id;
-        }
-
-        $task = $this->taskRepository->create($validated);
-        $task->load(['user:id,name', 'assignedBy:id,name']);
+        $task = $this->taskService->createTask($request->user(), $request->validated());
 
         return (new TaskResource($task))->response()->setStatusCode(201);
     }
@@ -97,7 +76,7 @@ class TaskController extends Controller
     )]
     public function show(Request $request, int $id)
     {
-        return new TaskResource($this->authorizedTask($request, $id));
+        return new TaskResource($this->taskService->getTask($request->user(), $id));
     }
 
     /**
@@ -120,16 +99,7 @@ class TaskController extends Controller
     )]
     public function update(UpdateTaskRequest $request, int $id)
     {
-        $task = $this->authorizedTask($request, $id);
-        $user = $request->user();
-
-        // Regla de actualización: No se puede editar si fue asignada por otra persona (admin)
-        if ($task->assigned_by_user_id && $task->assigned_by_user_id !== $user->id && !$user->isAdmin()) {
-            abort(403, "No se puede editar una tarea asignada por un administrador");
-        }
-
-        $task = $this->taskRepository->update($id, $request->validated());
-        $task->load(['user:id,name', 'assignedBy:id,name']);
+        $task = $this->taskService->updateTask($request->user(), $id, $request->validated());
 
         return new TaskResource($task);
     }
@@ -153,42 +123,9 @@ class TaskController extends Controller
     )]
     public function destroy(Request $request, int $id)
     {
-        $task = $this->authorizedTask($request, $id);
-        $user = $request->user();
-
-        // Regla de eliminación de tarea: no se puede eliminar si fue asignada por otra persona (admin)
-        if ($task->assigned_by_user_id && $task->assigned_by_user_id !== $user->id && !$user->isAdmin()) {
-            abort(403, "No se puede eliminar una tarea asignada por un administrador");
-        }
-
-        $this->taskRepository->delete($id);
+        $this->taskService->deleteTask($request->user(), $id);
 
         return response()->noContent();
     }
 
-    /**
-     * Fetch the task by id and ensure the authenticated user may access it
-     * (owner, or same company as the task).
-     */
-    private function authorizedTask(Request $request, int $id): Task
-    {
-        $task = $this->taskRepository->getById($id);
-
-        if (! $task) {
-            throw new NotFoundHttpException();
-        }
-
-        $user = $request->user();
-        $sameCompany = $task->company_id && $task->company_id === $user->company_id;
-
-        abort_unless(
-            $task->user_id === $user->id ||
-            $task->assigned_by_user_id === $user->id ||
-            $user->isAdmin() ||
-            $sameCompany,
-            403
-        );
-
-        return $task;
-    }
 }

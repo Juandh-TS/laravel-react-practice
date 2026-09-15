@@ -8,13 +8,7 @@ use App\Domains\User\Models\User;
 
 class TaskRepository implements TaskRepositoryInterface
 {
-
-    protected $task;
-
-    public function __construct(Task $task)
-    {
-        $this->task = $task;
-    }
+    public function __construct(protected Task $task){}
 
     public function getAllForUser(User $user, ?string $filter = null)
     {
@@ -31,7 +25,7 @@ class TaskRepository implements TaskRepositoryInterface
                 $q->where('user_id', $user->id)
                     ->orWhere('assigned_by_user_id', $user->id);
 
-                if ($user->company_id) {
+                if ($user->isAdmin() && $user->company_id) {
                     $q->orWhere('company_id', $user->company_id);
                 }
             });

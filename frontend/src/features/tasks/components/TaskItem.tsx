@@ -86,7 +86,9 @@ export function TaskItem({
     <li
       className={`task-item ${task.completed ? "completed done" : ""} ${isEditing ? "editing" : ""} ${isSaving ? "saving" : ""}`}
       onDoubleClick={handleDoubleClick}
-      data-tooltip={!isEditing && canEdit ? "Doble clic para editar" : undefined}
+      data-tooltip={
+        !isEditing && canEdit ? "Doble clic para editar" : undefined
+      }
     >
       {isEditing ? (
         <form onSubmit={handleSave} className="task-edit-form">
@@ -118,7 +120,7 @@ export function TaskItem({
                 >
                   {task.company_id
                     ? task.user_id === currentUserId
-                      ? "Compartida"
+                      ? "Tareas dentro de la empresa "
                       : `De ${task.user?.name ?? "un compañero"}`
                     : "Personal"}
                 </span>
@@ -183,9 +185,9 @@ export function TaskItem({
             )}
             {!canEdit && !canDelete && (
               <span
-                className="icon-btn"
+                className="icon-btn has-tooltip"
+                data-tooltip="Solo administradores pueden modificar esta tarea"
                 style={{ opacity: 0.5, cursor: "not-allowed" }}
-                title="Solo el administrador puede modificar o eliminar esta tarea"
                 aria-label="Tarea bloqueada"
               >
                 <i className="bi bi-lock-fill" aria-hidden="true" />
