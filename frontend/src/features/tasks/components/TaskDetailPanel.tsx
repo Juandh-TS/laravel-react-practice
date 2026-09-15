@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
+import type { User } from "@/types";
 import { tagsApi } from "../api/tagsApi";
 import { PRIORITIES, PRIORITY_LABELS, TASK_STATUSES, TASK_STATUS_LABELS } from "../types";
 import type { Priority, Tag, Task, TaskStatus } from "../types";
@@ -19,6 +20,8 @@ const TAG_COLOR_PALETTE = [
 interface TaskDetailPanelProps {
   task: Task | null;
   currentUserId?: number;
+  isAdmin?: boolean;
+  users?: User[];
   onClose: () => void;
   onUpdate: (
     id: number,
@@ -29,6 +32,7 @@ interface TaskDetailPanelProps {
       start_date: string | null;
       end_date: string | null;
       tag_ids: number[];
+      user_id: number | null;
     }>,
   ) => Promise<void>;
   onDelete: (id: number) => void;
@@ -37,6 +41,8 @@ interface TaskDetailPanelProps {
 export function TaskDetailPanel({
   task,
   currentUserId,
+  isAdmin = false,
+  users = [],
   onClose,
   onUpdate,
   onDelete,
@@ -104,6 +110,16 @@ export function TaskDetailPanel({
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "No se pudo actualizar el estado.",
+      );
+    }
+  }
+
+  async function handleAssigneeChange(userId: number | null) {
+    try {
+      await onUpdate(task!.id, { user_id: userId });
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "No se pudo reasignar la tarea.",
       );
     }
   }
@@ -406,20 +422,43 @@ export function TaskDetailPanel({
           </div>
         </div>
 
-        {(task.user || task.assigned_by) && (
-          <div className="task-detail-meta">
-            {task.user && (
+        {isAdmin ? (
+          <div className="task-detail-field task-detail-assignee-field">
+            <label htmlFor="task-detail-assignee">Asignada a</label>
+            <select
+              id="task-detail-assignee"
+              value={task.user_id ?? ""}
+              onChange={(e) =>
+                handleAssigneeChange(
+                  e.target.value ? Number(e.target.value) : null,
+                )
+              }
+            >
+              <option value="">Sin asignar</option>
+              {users.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        ) : (
+          task.user && (
+            <div className="task-detail-meta">
               <span className="task-assigned-to-badge">
                 <i className="bi bi-person-fill" aria-hidden="true" />
                 Asignada a: <strong>{task.user.name}</strong>
               </span>
-            )}
-            {task.assigned_by && (
-              <span className="task-assigned-badge">
-                <i className="bi bi-shield-check" aria-hidden="true" />
-                Asignada por: <strong>{task.assigned_by.name}</strong>
-              </span>
-            )}
+            </div>
+          )
+        )}
+
+        {task.assigned_by && (
+          <div className="task-detail-meta">
+            <span className="task-assigned-badge">
+              <i className="bi bi-shield-check" aria-hidden="true" />
+              Asignada por: <strong>{task.assigned_by.name}</strong>
+            </span>
           </div>
         )}
 

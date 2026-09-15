@@ -105,6 +105,7 @@ export function TasksPage() {
       start_date: string | null;
       end_date: string | null;
       tag_ids: number[];
+      user_id: number | null;
     }>,
   ) {
     try {
@@ -205,6 +206,8 @@ export function TasksPage() {
       <TaskDetailPanel
         task={selectedTask}
         currentUserId={user?.id}
+        isAdmin={isAdmin}
+        users={users}
         onClose={() => setSelectedTaskId(null)}
         onUpdate={handleUpdate}
         onDelete={handleDelete}

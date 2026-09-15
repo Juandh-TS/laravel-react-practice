@@ -56,6 +56,15 @@ class TaskService
             }
         }
 
+        if (array_key_exists('user_id', $data)) {
+            abort_unless($user->isAdmin(), 403, "Solo un administrador puede reasignar una tarea");
+
+            if ($data['user_id'] != $task->user_id) {
+                $data['assigned_by_user_id'] = $user->id;
+                $data['assigned_at'] = now();
+            }
+        }
+
         $tagIds = $data['tag_ids'] ?? null;
         unset($data['tag_ids']);
 

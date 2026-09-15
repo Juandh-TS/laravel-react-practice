@@ -26,6 +26,7 @@ class UpdateTaskRequest extends FormRequest
             'priority' => ['sometimes', Rule::in(Task::PRIORITIES)],
             'tag_ids' => ['sometimes', 'array'],
             'tag_ids.*' => ['integer', 'exists:tags,id'],
+            'user_id' => ['sometimes', 'nullable', 'exists:users,id'],
 
         ];
     }

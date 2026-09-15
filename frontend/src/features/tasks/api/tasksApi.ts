@@ -23,6 +23,7 @@ export const tasksApi = {
       start_date: string | null
       end_date: string | null
       tag_ids: number[]
+      user_id: number | null
     }>,
   ) =>
     request<Task>(`/tasks/${id}`, {
