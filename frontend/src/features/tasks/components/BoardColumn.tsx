@@ -10,7 +10,6 @@ interface BoardColumnProps {
   tasks: Task[];
   currentUserId?: number;
   onSelect: (task: Task) => void;
-  onStatusChange: (task: Task, status: TaskStatus) => void;
 }
 
 export function BoardColumn({
@@ -18,7 +17,6 @@ export function BoardColumn({
   tasks,
   currentUserId,
   onSelect,
-  onStatusChange,
 }: BoardColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id: status });
 
@@ -40,7 +38,6 @@ export function BoardColumn({
               task={task}
               currentUserId={currentUserId}
               onSelect={onSelect}
-              onStatusChange={onStatusChange}
             />
           ))}
         </ul>

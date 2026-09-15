@@ -1133,7 +1133,6 @@ button {
   list-style: none;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-left: 3px solid var(--color-text-muted);
   border-radius: 0.6rem;
   padding: 0.7rem 0.8rem;
   display: flex;
@@ -1151,14 +1150,6 @@ button {
 .task-card.dragging {
   opacity: 0.55;
   cursor: grabbing;
-}
-
-.task-card.status-in_progress {
-  border-left-color: var(--color-primary);
-}
-
-.task-card.status-done {
-  border-left-color: var(--color-success);
 }
 
 .task-card-title {
