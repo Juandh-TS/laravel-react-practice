@@ -13,7 +13,8 @@ class TaskRepository implements TaskRepositoryInterface
     public function getAllForUser(User $user, ?string $filter = null)
     {
         $query = $this->task->query()
-            ->with(['user:id,name', 'assignedBy:id,name']);
+            ->with(['user:id,name', 'assignedBy:id,name'])
+            ->withCount('comments');
 
         if ($filter === 'assigned_to_me') {
             $query->where('user_id', $user->id);
@@ -36,7 +37,7 @@ class TaskRepository implements TaskRepositoryInterface
 
     public function getById(int $id)
     {
-        return $this->task->with(['user:id,name', 'assignedBy:id,name'])->find($id);
+        return $this->task->with(['user:id,name', 'assignedBy:id,name'])->withCount('comments')->find($id);
     }
 
     public function create(array $data)

@@ -6,9 +6,10 @@ import { useAuth } from "@/features/auth/context/AuthContext";
 import { usersApi } from "@/features/users/api/usersApi";
 import type { User } from "@/features/users/types";
 import { tasksApi } from "./api/tasksApi";
+import { TaskBoard } from "./components/TaskBoard";
+import { TaskDetailPanel } from "./components/TaskDetailPanel";
 import { TaskForm } from "./components/TaskForm";
-import { TaskItem } from "./components/TaskItem";
-import type { Task, TaskFilter } from "./types";
+import type { Task, TaskFilter, TaskStatus } from "./types";
 
 export function TasksPage() {
   const { user } = useAuth();
@@ -18,6 +19,7 @@ export function TasksPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
 
   const isAdmin = user?.role === "admin";
 
@@ -64,18 +66,16 @@ export function TasksPage() {
     }
   }
 
-  async function handleToggle(task: Task) {
-    const previousCompleted = task.completed;
+  async function handleStatusChange(task: Task, status: TaskStatus) {
+    const previousStatus = task.status;
 
     // Optimistic update: cambiar inmediatamente en la UI
     setTasks((current) =>
-      current.map((t) =>
-        t.id === task.id ? { ...t, completed: !t.completed } : t,
-      ),
+      current.map((t) => (t.id === task.id ? { ...t, status } : t)),
     );
 
     try {
-      const updated = await tasksApi.toggle(task);
+      const updated = await tasksApi.update(task.id, { status });
       setTasks((current) =>
         current.map((t) => (t.id === task.id ? updated : t)),
       );
@@ -83,7 +83,7 @@ export function TasksPage() {
       // Revertir estado en caso de error
       setTasks((current) =>
         current.map((t) =>
-          t.id === task.id ? { ...t, completed: previousCompleted } : t,
+          t.id === task.id ? { ...t, status: previousStatus } : t,
         ),
       );
       setFormError(
@@ -92,9 +92,17 @@ export function TasksPage() {
     }
   }
 
-  async function handleUpdate(id: number, title: string) {
+  async function handleUpdate(
+    id: number,
+    data: Partial<{
+      title: string;
+      status: TaskStatus;
+      start_date: string | null;
+      end_date: string | null;
+    }>,
+  ) {
     try {
-      const updated = await tasksApi.update(id, { title });
+      const updated = await tasksApi.update(id, data);
       setTasks((current) => current.map((t) => (t.id === id ? updated : t)));
     } catch (err) {
       setFormError(
@@ -109,6 +117,7 @@ export function TasksPage() {
 
     // Optimistic update: quitar inmediatamente de la lista
     setTasks((current) => current.filter((t) => t.id !== id));
+    setSelectedTaskId((current) => (current === id ? null : current));
 
     try {
       await tasksApi.remove(id);
@@ -122,6 +131,8 @@ export function TasksPage() {
       );
     }
   }
+
+  const selectedTask = tasks.find((t) => t.id === selectedTaskId) ?? null;
 
   return (
     <>
@@ -176,18 +187,22 @@ export function TasksPage() {
         <p className="state-message">No hay tareas pendientes. ¡Agrega una!</p>
       )}
 
-      <ul className="task-list">
-        {tasks.map((task) => (
-          <TaskItem
-            key={task.id}
-            task={task}
-            currentUserId={user?.id}
-            onToggle={handleToggle}
-            onUpdate={handleUpdate}
-            onDelete={handleDelete}
-          />
-        ))}
-      </ul>
+      {!loading && !error && tasks.length > 0 && (
+        <TaskBoard
+          tasks={tasks}
+          currentUserId={user?.id}
+          onSelect={(task) => setSelectedTaskId(task.id)}
+          onStatusChange={handleStatusChange}
+        />
+      )}
+
+      <TaskDetailPanel
+        task={selectedTask}
+        currentUserId={user?.id}
+        onClose={() => setSelectedTaskId(null)}
+        onUpdate={handleUpdate}
+        onDelete={handleDelete}
+      />
     </>
   );
 }

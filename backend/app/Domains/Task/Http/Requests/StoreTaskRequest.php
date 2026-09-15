@@ -2,7 +2,9 @@
 
 namespace App\Domains\Task\Http\Requests;
 
+use App\Domains\Task\Models\Task;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreTaskRequest extends FormRequest
 {
@@ -18,6 +20,9 @@ class StoreTaskRequest extends FormRequest
         return [
             'title' => ['required', 'string', 'max:255'],
             'user_id' => ['nullable', 'exists:users,id'],
+            'status' => ['sometimes', Rule::in(Task::STATUSES)],
+            'start_date' => ['sometimes', 'nullable', 'date'],
+            'end_date' => ['sometimes', 'nullable', 'date', 'after_or_equal:start_date'],
         ];
     }
 }

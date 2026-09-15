@@ -1,5 +1,5 @@
 import { request } from '@/api/client'
-import type { Task, TaskFilter } from '../types'
+import type { Task, TaskFilter, TaskStatus } from '../types'
 
 export const tasksApi = {
   list: (filter?: TaskFilter) => {
@@ -13,16 +13,19 @@ export const tasksApi = {
       body: JSON.stringify({ title, user_id: userId }),
     }),
 
-  update: (id: number, data: Partial<{ title: string, completed: boolean }>) =>
+  update: (
+    id: number,
+    data: Partial<{
+      title: string
+      completed: boolean
+      status: TaskStatus
+      start_date: string | null
+      end_date: string | null
+    }>,
+  ) =>
     request<Task>(`/tasks/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
-    }),
-
-  toggle: (task: Task) =>
-    request<Task>(`/tasks/${task.id}`, {
-      method: 'PUT',
-      body: JSON.stringify({ completed: !task.completed }),
     }),
 
   remove: (id: number) =>
