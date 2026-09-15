@@ -1,5 +1,6 @@
 .app {
-  max-width: 34rem;
+  max-width: 64rem;
+  
   margin: 0 auto;
   /* padding-top deja espacio fijo para el reloj (arriba-izq.) y la racha del cursor (arriba-der.),
      ambos con position: fixed, para que nunca se superpongan con el header en anchos intermedios. */
@@ -345,6 +346,7 @@
   border-radius: 1rem;
   padding: 1.75rem;
   box-shadow: var(--shadow-md);
+  min-height: 36rem;
 }
 
 .panel h1 {
