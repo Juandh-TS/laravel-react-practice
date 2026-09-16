@@ -2,26 +2,17 @@ import { useEffect, useState } from "react";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import type { User } from "@/types";
 import { tagsApi } from "../api/tagsApi";
-import { PRIORITIES, PRIORITY_LABELS, TASK_STATUSES, TASK_STATUS_LABELS } from "../types";
-import type { Priority, Tag, Task, TaskStatus } from "../types";
+import { COLOR_PALETTE as TAG_COLOR_PALETTE } from "../constants";
+import type { Priority, PriorityOption, Tag, Task, TaskStatus, TaskStatusOption } from "../types";
 import { TaskComments } from "./TaskComments";
-
-const TAG_COLOR_PALETTE = [
-  "#6366f1", // Indigo
-  "#10b981", // Emerald
-  "#f59e0b", // Amber
-  "#f43f5e", // Rose
-  "#0ea5e9", // Sky
-  "#a855f7", // Purple
-  "#ec4899", // Pink
-  "#14b8a6", // Teal
-];
 
 interface TaskDetailPanelProps {
   task: Task | null;
   currentUserId?: number;
   isAdmin?: boolean;
   users?: User[];
+  statuses: TaskStatusOption[];
+  priorities: PriorityOption[];
   onClose: () => void;
   onUpdate: (
     id: number,
@@ -43,6 +34,8 @@ export function TaskDetailPanel({
   currentUserId,
   isAdmin = false,
   users = [],
+  statuses,
+  priorities,
   onClose,
   onUpdate,
   onDelete,
@@ -251,9 +244,9 @@ export function TaskDetailPanel({
               value={task.status}
               onChange={(e) => handleStatusChange(e.target.value as TaskStatus)}
             >
-              {TASK_STATUSES.map((status) => (
-                <option key={status} value={status}>
-                  {TASK_STATUS_LABELS[status]}
+              {statuses.map((status) => (
+                <option key={status.slug} value={status.slug}>
+                  {status.label}
                 </option>
               ))}
             </select>
@@ -263,12 +256,12 @@ export function TaskDetailPanel({
             <label htmlFor="task-detail-priority">Prioridad</label>
             <select
               id="task-detail-priority"
-              value={task.priority ?? "medium"}
+              value={task.priority ?? priorities[0]?.slug ?? ""}
               onChange={(e) => handlePriorityChange(e.target.value as Priority)}
             >
-              {PRIORITIES.map((priority) => (
-                <option key={priority} value={priority}>
-                  {PRIORITY_LABELS[priority]}
+              {priorities.map((priority) => (
+                <option key={priority.slug} value={priority.slug}>
+                  {priority.label}
                 </option>
               ))}
             </select>

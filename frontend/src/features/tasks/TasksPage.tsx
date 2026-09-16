@@ -5,11 +5,21 @@ import { Spinner } from "@/components/common/Spinner";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { usersApi } from "@/features/users/api/usersApi";
 import type { User } from "@/features/users/types";
+import { taskPrioritiesApi } from "./api/taskPrioritiesApi";
+import { taskStatusesApi } from "./api/taskStatusesApi";
 import { tasksApi } from "./api/tasksApi";
+import { BoardSettingsPanel } from "./components/BoardSettingsPanel";
 import { TaskBoard } from "./components/TaskBoard";
 import { TaskDetailPanel } from "./components/TaskDetailPanel";
 import { TaskForm } from "./components/TaskForm";
-import type { Priority, Task, TaskFilter, TaskStatus } from "./types";
+import type {
+  Priority,
+  PriorityOption,
+  Task,
+  TaskFilter,
+  TaskStatus,
+  TaskStatusOption,
+} from "./types";
 
 export function TasksPage() {
   const { user } = useAuth();
@@ -20,8 +30,20 @@ export function TasksPage() {
   const [error, setError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
+  const [statuses, setStatuses] = useState<TaskStatusOption[]>([]);
+  const [priorities, setPriorities] = useState<PriorityOption[]>([]);
+  const [showBoardSettings, setShowBoardSettings] = useState(false);
 
   const isAdmin = user?.role === "admin";
+
+  const loadBoardOptions = useCallback(async () => {
+    const [statusesData, prioritiesData] = await Promise.all([
+      taskStatusesApi.list(),
+      taskPrioritiesApi.list(),
+    ]);
+    setStatuses(statusesData);
+    setPriorities(prioritiesData);
+  }, []);
 
   const loadTasks = useCallback(async (currentFilter: TaskFilter) => {
     setLoading(true);
@@ -41,6 +63,12 @@ export function TasksPage() {
   useEffect(() => {
     loadTasks(filter);
   }, [filter, loadTasks]);
+
+  useEffect(() => {
+    loadBoardOptions().catch((err) =>
+      console.error("Error al cargar estados/prioridades:", err),
+    );
+  }, [loadBoardOptions]);
 
   useEffect(() => {
     if (isAdmin) {
@@ -142,6 +170,42 @@ export function TasksPage() {
     }
   }
 
+  async function handleCreateStatus(label: string, color: string, isDone: boolean) {
+    await taskStatusesApi.create(label, color, isDone);
+    await loadBoardOptions();
+  }
+
+  async function handleUpdateStatus(
+    id: number,
+    data: Partial<{ label: string; color: string; position: number; is_done: boolean }>,
+  ) {
+    await taskStatusesApi.update(id, data);
+    await loadBoardOptions();
+  }
+
+  async function handleDeleteStatus(id: number) {
+    await taskStatusesApi.remove(id);
+    await loadBoardOptions();
+  }
+
+  async function handleCreatePriority(label: string, color: string) {
+    await taskPrioritiesApi.create(label, color);
+    await loadBoardOptions();
+  }
+
+  async function handleUpdatePriority(
+    id: number,
+    data: Partial<{ label: string; color: string; position: number }>,
+  ) {
+    await taskPrioritiesApi.update(id, data);
+    await loadBoardOptions();
+  }
+
+  async function handleDeletePriority(id: number) {
+    await taskPrioritiesApi.remove(id);
+    await loadBoardOptions();
+  }
+
   const selectedTask = tasks.find((t) => t.id === selectedTaskId) ?? null;
 
   return (
@@ -156,6 +220,7 @@ export function TasksPage() {
         isAdmin={isAdmin}
         users={users}
         currentUserId={user?.id}
+        priorities={priorities}
         onSubmit={handleCreate}
       />
 
@@ -185,6 +250,13 @@ export function TasksPage() {
               Asignadas a otros
             </button>
           </div>
+          <button
+            type="button"
+            className="btn secondary task-board-settings-btn"
+            onClick={() => setShowBoardSettings(true)}
+          >
+            <i className="bi bi-sliders" aria-hidden="true" /> Gestionar estados y prioridades
+          </button>
         </div>
       )}
 
@@ -200,6 +272,8 @@ export function TasksPage() {
       {!loading && !error && tasks.length > 0 && (
         <TaskBoard
           tasks={tasks}
+          statuses={statuses}
+          priorities={priorities}
           currentUserId={user?.id}
           onSelect={(task) => setSelectedTaskId(task.id)}
           onReorder={handleReorder}
@@ -211,10 +285,26 @@ export function TasksPage() {
         currentUserId={user?.id}
         isAdmin={isAdmin}
         users={users}
+        statuses={statuses}
+        priorities={priorities}
         onClose={() => setSelectedTaskId(null)}
         onUpdate={handleUpdate}
         onDelete={handleDelete}
       />
+
+      {showBoardSettings && (
+        <BoardSettingsPanel
+          statuses={statuses}
+          priorities={priorities}
+          onClose={() => setShowBoardSettings(false)}
+          onCreateStatus={handleCreateStatus}
+          onUpdateStatus={handleUpdateStatus}
+          onDeleteStatus={handleDeleteStatus}
+          onCreatePriority={handleCreatePriority}
+          onUpdatePriority={handleUpdatePriority}
+          onDeletePriority={handleDeletePriority}
+        />
+      )}
     </>
   );
 }

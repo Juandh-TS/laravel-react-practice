@@ -1,16 +1,22 @@
 import {
   DndContext,
+  DragOverlay,
   PointerSensor,
   useSensor,
   useSensors,
+  type DragCancelEvent,
   type DragEndEvent,
+  type DragStartEvent,
 } from "@dnd-kit/core";
+import { useState } from "react";
 import { BoardColumn } from "./BoardColumn";
-import { TASK_STATUSES } from "../types";
-import type { Task, TaskStatus } from "../types";
+import { TaskCard } from "./TaskCard";
+import type { PriorityOption, Task, TaskStatus, TaskStatusOption } from "../types";
 
 interface TaskBoardProps {
   tasks: Task[];
+  statuses: TaskStatusOption[];
+  priorities: PriorityOption[];
   currentUserId?: number;
   onSelect: (task: Task) => void;
   onReorder: (task: Task, status: TaskStatus, position: number) => void;
@@ -18,25 +24,41 @@ interface TaskBoardProps {
 
 const POSITION_GAP = 1000;
 
-function isTaskStatus(value: unknown): value is TaskStatus {
-  return TASK_STATUSES.includes(value as TaskStatus);
-}
-
 function sortByPosition(tasks: Task[]): Task[] {
   return [...tasks].sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
 }
 
 export function TaskBoard({
   tasks,
+  statuses,
+  priorities,
   currentUserId,
   onSelect,
   onReorder,
 }: TaskBoardProps) {
+  const [activeTask, setActiveTask] = useState<Task | null>(null);
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
   );
 
+  const statusSlugs = new Set(statuses.map((s) => s.slug));
+
+  function isTaskStatus(value: unknown): value is TaskStatus {
+    return typeof value === "string" && statusSlugs.has(value);
+  }
+
+  function handleDragStart(event: DragStartEvent) {
+    setActiveTask(tasks.find((t) => t.id === event.active.id) ?? null);
+  }
+
+  function handleDragCancel(_event: DragCancelEvent) {
+    setActiveTask(null);
+  }
+
   function handleDragEnd(event: DragEndEvent) {
+    setActiveTask(null);
+
     const { active, over } = event;
     if (!over) return;
 
@@ -90,18 +112,38 @@ export function TaskBoard({
   }
 
   return (
-    <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+    <DndContext
+      sensors={sensors}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      onDragCancel={handleDragCancel}
+    >
       <div className="task-board">
-        {TASK_STATUSES.map((status) => (
-          <BoardColumn
-            key={status}
-            status={status}
-            tasks={sortByPosition(tasks.filter((t) => t.status === status))}
-            currentUserId={currentUserId}
-            onSelect={onSelect}
-          />
-        ))}
+        {[...statuses]
+          .sort((a, b) => a.position - b.position)
+          .map((status) => (
+            <BoardColumn
+              key={status.slug}
+              status={status}
+              tasks={sortByPosition(tasks.filter((t) => t.status === status.slug))}
+              priorities={priorities}
+              currentUserId={currentUserId}
+              onSelect={onSelect}
+            />
+          ))}
       </div>
+
+      <DragOverlay>
+        {activeTask && (
+          <TaskCard
+            task={activeTask}
+            priorities={priorities}
+            currentUserId={currentUserId}
+            onSelect={() => {}}
+            dragOverlay
+          />
+        )}
+      </DragOverlay>
     </DndContext>
   );
 }

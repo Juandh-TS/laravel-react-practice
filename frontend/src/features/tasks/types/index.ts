@@ -1,24 +1,27 @@
 export type TaskFilter = 'all' | 'assigned_to_me' | 'assigned_by_me'
 
-export type TaskStatus = 'todo' | 'in_progress' | 'done'
+// Statuses and priorities are admin-managed per company (see BoardSettingsPanel);
+// slugs are stable identifiers, `TaskStatusOption`/`PriorityOption` carry the
+// display label/color/order fetched from the API.
+export type TaskStatus = string
 
-export const TASK_STATUSES: TaskStatus[] = ['todo', 'in_progress', 'done']
+export type Priority = string
 
-export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
-  todo: 'Por hacer',
-  in_progress: 'En progreso',
-  done: 'Hecho',
+export interface TaskStatusOption {
+  id: number
+  slug: string
+  label: string
+  color: string
+  position: number
+  is_done: boolean
 }
 
-export type Priority = 'low' | 'medium' | 'high' | 'urgent'
-
-export const PRIORITIES: Priority[] = ['low', 'medium', 'high', 'urgent']
-
-export const PRIORITY_LABELS: Record<Priority, string> = {
-  low: 'Baja',
-  medium: 'Media',
-  high: 'Alta',
-  urgent: 'Urgente',
+export interface PriorityOption {
+  id: number
+  slug: string
+  label: string
+  color: string
+  position: number
 }
 
 export interface Tag {

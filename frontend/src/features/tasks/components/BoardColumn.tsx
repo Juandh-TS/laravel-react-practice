@@ -2,12 +2,12 @@ import { useDroppable } from "@dnd-kit/core";
 import { SortableContext } from "@dnd-kit/sortable";
 import { Badge } from "@/components/common/Badge";
 import { TaskCard } from "./TaskCard";
-import { TASK_STATUS_LABELS } from "../types";
-import type { Task, TaskStatus } from "../types";
+import type { PriorityOption, Task, TaskStatusOption } from "../types";
 
 interface BoardColumnProps {
-  status: TaskStatus;
+  status: TaskStatusOption;
   tasks: Task[];
+  priorities: PriorityOption[];
   currentUserId?: number;
   onSelect: (task: Task) => void;
 }
@@ -15,15 +15,16 @@ interface BoardColumnProps {
 export function BoardColumn({
   status,
   tasks,
+  priorities,
   currentUserId,
   onSelect,
 }: BoardColumnProps) {
-  const { setNodeRef, isOver } = useDroppable({ id: status });
+  const { setNodeRef, isOver } = useDroppable({ id: status.slug });
 
   return (
     <div className={`board-column ${isOver ? "over" : ""}`}>
-      <div className={`board-column-header status-${status}`}>
-        <span>{TASK_STATUS_LABELS[status]}</span>
+      <div className="board-column-header" style={{ borderBottomColor: status.color }}>
+        <span>{status.label}</span>
         <Badge count={tasks.length} />
       </div>
 
@@ -36,6 +37,7 @@ export function BoardColumn({
             <TaskCard
               key={task.id}
               task={task}
+              priorities={priorities}
               currentUserId={currentUserId}
               onSelect={onSelect}
             />

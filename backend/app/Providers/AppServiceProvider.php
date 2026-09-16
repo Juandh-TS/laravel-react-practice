@@ -8,8 +8,12 @@ use App\Domains\Company\Repositories\Contracts\CompanyRepositoryInterface;
 use App\Domains\Company\Repositories\Eloquent\CompanyRepository;
 use App\Domains\Tag\Repositories\Contracts\TagRepositoryInterface;
 use App\Domains\Tag\Repositories\Eloquent\TagRepository;
+use App\Domains\Task\Repositories\Contracts\TaskPriorityRepositoryInterface;
 use App\Domains\Task\Repositories\Contracts\TaskRepositoryInterface;
+use App\Domains\Task\Repositories\Contracts\TaskStatusRepositoryInterface;
+use App\Domains\Task\Repositories\Eloquent\TaskPriorityRepository;
 use App\Domains\Task\Repositories\Eloquent\TaskRepository;
+use App\Domains\Task\Repositories\Eloquent\TaskStatusRepository;
 use App\Domains\User\Repositories\Contracts\UserRepositoryInterface;
 use App\Domains\User\Repositories\Eloquent\UserRepository;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -27,6 +31,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(CompanyRepositoryInterface::class, CompanyRepository::class);
         $this->app->bind(CommentRepositoryInterface::class, CommentRepository::class);
         $this->app->bind(TagRepositoryInterface::class, TagRepository::class);
+        $this->app->bind(TaskStatusRepositoryInterface::class, TaskStatusRepository::class);
+        $this->app->bind(TaskPriorityRepositoryInterface::class, TaskPriorityRepository::class);
     }
 
 

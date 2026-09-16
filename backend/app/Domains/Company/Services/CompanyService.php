@@ -4,13 +4,17 @@ namespace App\Domains\Company\Services;
 
 use App\Domains\Company\Models\Company;
 use App\Domains\Company\Repositories\Contracts\CompanyRepositoryInterface;
+use App\Domains\Task\Services\TaskBoardDefaultsService;
 use App\Domains\User\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 
 class CompanyService
 {
 
-    public function __construct(protected CompanyRepositoryInterface $companyRepository) {}
+    public function __construct(
+        protected CompanyRepositoryInterface $companyRepository,
+        protected TaskBoardDefaultsService $taskBoardDefaults,
+    ) {}
 
     public function getAll(User $user): Collection
     {
@@ -35,7 +39,11 @@ class CompanyService
         if (! $user->isAdmin()) {
             throw new \Exception('Unauthorized');
         }
-        return $this->companyRepository->create($data);
+
+        $company = $this->companyRepository->create($data);
+        $this->taskBoardDefaults->seedForCompany($company->id);
+
+        return $company;
     }
 
     public function update(int $id, array $data, User $user)

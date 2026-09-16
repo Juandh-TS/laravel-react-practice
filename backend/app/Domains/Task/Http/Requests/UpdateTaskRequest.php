@@ -2,7 +2,8 @@
 
 namespace App\Domains\Task\Http\Requests;
 
-use App\Domains\Task\Models\Task;
+use App\Domains\Task\Models\TaskPriority;
+use App\Domains\Task\Models\TaskStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -20,10 +21,10 @@ class UpdateTaskRequest extends FormRequest
         return [
             'title' => ['sometimes', 'string', 'max:255'],
             'completed' => ['sometimes', 'boolean'],
-            'status' => ['sometimes', Rule::in(Task::STATUSES)],
+            'status' => ['sometimes', Rule::in($this->availableStatusSlugs())],
             'start_date' => ['sometimes', 'nullable', 'date'],
             'end_date' => ['sometimes', 'nullable', 'date', 'after_or_equal:start_date'],
-            'priority' => ['sometimes', Rule::in(Task::PRIORITIES)],
+            'priority' => ['sometimes', Rule::in($this->availablePrioritySlugs())],
             'position' => ['sometimes', 'numeric'],
             'tag_ids' => ['sometimes', 'array'],
             'tag_ids.*' => ['integer', 'exists:tags,id'],
@@ -31,5 +32,14 @@ class UpdateTaskRequest extends FormRequest
 
         ];
     }
-}
 
+    private function availableStatusSlugs(): array
+    {
+        return TaskStatus::query()->where('company_id', $this->user()?->company_id)->pluck('slug')->all();
+    }
+
+    private function availablePrioritySlugs(): array
+    {
+        return TaskPriority::query()->where('company_id', $this->user()?->company_id)->pluck('slug')->all();
+    }
+}

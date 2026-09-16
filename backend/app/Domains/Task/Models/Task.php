@@ -20,9 +20,6 @@ class Task extends Model
 {
     use HasFactory, SoftDeletes;
 
-    public const STATUSES = ['todo', 'in_progress', 'done'];
-    public const PRIORITIES = ['low', 'medium', 'high', 'urgent'];
-
     protected $fillable = [
         'title',
         'completed',
@@ -62,16 +59,6 @@ class Task extends Model
         return $this->belongsToMany(Tag::class, 'tag_task');
     }
 
-
-    /**
-     * Mantiene `completed` sincronizado con `status` para no romper
-     * consumidores existentes de ese booleano (ej. el snapshot del chatbot).
-     */
-    protected function setStatusAttribute(string $value): void
-    {
-        $this->attributes['status'] = $value;
-        $this->attributes['completed'] = $value === 'done';
-    }
 
     protected function casts(): array
     {
