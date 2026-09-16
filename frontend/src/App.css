@@ -1211,6 +1211,7 @@ button {
 .task-detail-panel {
   width: min(440px, 100vw);
   height: 100vh;
+  height: 100dvh;
   background: var(--color-surface);
   border-left: 1px solid var(--color-border);
   box-shadow: var(--shadow-md);
@@ -1655,7 +1656,27 @@ button {
 /* Board settings panel (admin-managed statuses/priorities) */
 
 .board-settings-panel {
+  overflow: hidden;
+}
+
+.board-settings-header {
+  flex-shrink: 0;
+}
+
+.board-settings-scroll-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
   gap: 1.5rem;
+  margin: 0 -1.5rem -1.5rem;
+  padding: 0 1.5rem 1.5rem;
+  /* Extra slack at the bottom so the last "Agregar" button can be scrolled
+     clear of OS chrome (e.g. the Windows taskbar) that 100vh/100dvh can
+     still report as part of the visible viewport. */
+  padding-bottom: 5rem;
+  scroll-padding-bottom: 5rem;
 }
 
 .board-settings-section h3 {

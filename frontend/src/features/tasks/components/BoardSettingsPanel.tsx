@@ -82,7 +82,7 @@ export function BoardSettingsPanel({
         aria-label="Gestionar estados y prioridades"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="task-detail-header">
+        <div className="task-detail-header board-settings-header">
           <h2 className="task-detail-title">Estados y prioridades</h2>
           <button
             type="button"
@@ -95,6 +95,7 @@ export function BoardSettingsPanel({
           </button>
         </div>
 
+        <div className="board-settings-scroll-body">
         {error && (
           <p className="error" role="alert">
             {error}
@@ -314,6 +315,7 @@ export function BoardSettingsPanel({
             </button>
           </form>
         </section>
+        </div>
       </aside>
     </div>
   );
