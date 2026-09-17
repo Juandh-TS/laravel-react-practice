@@ -8,6 +8,8 @@ use App\Domains\Company\Repositories\Contracts\CompanyRepositoryInterface;
 use App\Domains\Company\Repositories\Eloquent\CompanyRepository;
 use App\Domains\Tag\Repositories\Contracts\TagRepositoryInterface;
 use App\Domains\Tag\Repositories\Eloquent\TagRepository;
+use App\Domains\Task\Models\Task;
+use App\Domains\Task\Policies\TaskPolicy;
 use App\Domains\Task\Repositories\Contracts\TaskPriorityRepositoryInterface;
 use App\Domains\Task\Repositories\Contracts\TaskRepositoryInterface;
 use App\Domains\Task\Repositories\Contracts\TaskStatusRepositoryInterface;
@@ -17,6 +19,7 @@ use App\Domains\Task\Repositories\Eloquent\TaskStatusRepository;
 use App\Domains\User\Repositories\Contracts\UserRepositoryInterface;
 use App\Domains\User\Repositories\Eloquent\UserRepository;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -45,5 +48,8 @@ class AppServiceProvider extends ServiceProvider
         // único que realmente controla el wrapping en Resource::collection(),
         // ya que la propiedad estática $wrap por clase no lo hace.
         JsonResource::withoutWrapping();
+
+        //Policies
+        Gate::policy(Task::class, TaskPolicy::class);
     }
 }

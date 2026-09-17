@@ -8,6 +8,7 @@ use App\Domains\Task\Http\Resources\TaskResource;
 use App\Domains\Task\Services\TaskService;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use OpenApi\Attributes as OA;
 
 #[OA\Tag(name: 'Tasks', description: 'Task management endpoints')]
@@ -76,7 +77,11 @@ class TaskController extends Controller
     )]
     public function show(Request $request, int $id)
     {
-        return new TaskResource($this->taskService->getTask($request->user(), $id));
+        $task = $this->taskService->getTask($request->user(), $id);
+
+        Gate::authorize("view", $task);
+
+        return new TaskResource($task);
     }
 
     /**
@@ -99,9 +104,13 @@ class TaskController extends Controller
     )]
     public function update(UpdateTaskRequest $request, int $id)
     {
-        $task = $this->taskService->updateTask($request->user(), $id, $request->validated());
+        $task = $this->taskService->getTask($request->user(), $id);
 
-        return new TaskResource($task);
+        Gate::authorize('update', $task);
+
+        $updatedTask = $this->taskService->updateTask($request->user(), $id, $request->validated());
+
+        return new TaskResource($updatedTask);
     }
 
     /**
@@ -123,6 +132,10 @@ class TaskController extends Controller
     )]
     public function destroy(Request $request, int $id)
     {
+        $task = $this->taskService->getTask($request->user(), $id);
+
+        Gate::authorize('delete', $task);
+
         $this->taskService->deleteTask($request->user(), $id);
 
         return response()->noContent();
